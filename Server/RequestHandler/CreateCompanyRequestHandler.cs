@@ -12,9 +12,9 @@ namespace Server.Requesthandler
 	public class CreateCompanyRequestHandler : IHandleMessages<CreateCompanyRequest>
 	{
 		readonly DbContextOptionsBuilder<CarApiContext> _dbContextOptionsBuilder;
-		public CreateCompanyRequestHandler(DbContextOptionsBuilder<CarApiContext> dbContextOptionsBuilder)
+		public CreateCompanyRequestHandler()
 		{
-			_dbContextOptionsBuilder = dbContextOptionsBuilder;
+			_dbContextOptionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
 		}
 
 		static ILog log = LogManager.GetLogger<CreateCompanyRequest>();

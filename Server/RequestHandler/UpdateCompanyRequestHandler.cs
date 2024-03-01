@@ -13,9 +13,9 @@ namespace Server.Requesthandler
 	public class UpdateCompanyRequestHandler : IHandleMessages<UpdateCompanyRequest>
 	{
 		readonly DbContextOptionsBuilder<CarApiContext> _dbContextOptionsBuilder;
-		public UpdateCompanyRequestHandler(DbContextOptionsBuilder<CarApiContext> dbContextOptionsBuilder)
+		public UpdateCompanyRequestHandler()
 		{
-			_dbContextOptionsBuilder = dbContextOptionsBuilder;
+			_dbContextOptionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
 		}
 		static ILog log = LogManager.GetLogger<UpdateCompanyRequest>();
 

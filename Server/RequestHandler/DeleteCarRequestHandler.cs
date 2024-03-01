@@ -13,9 +13,9 @@ namespace Server.Requesthandler
 	public class DeleteCarRequestHandler : IHandleMessages<DeleteCarRequest>
 	{
 		readonly DbContextOptionsBuilder<CarApiContext> _dbContextOptionsBuilder;
-		public DeleteCarRequestHandler(DbContextOptionsBuilder<CarApiContext> dbContextOptionsBuilder)
+		public DeleteCarRequestHandler()
 		{
-			_dbContextOptionsBuilder = dbContextOptionsBuilder;
+			_dbContextOptionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
 		}
 
 		static ILog log = LogManager.GetLogger<DeleteCarRequestHandler>();

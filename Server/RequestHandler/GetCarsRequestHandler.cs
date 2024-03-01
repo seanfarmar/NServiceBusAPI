@@ -15,9 +15,9 @@ namespace Server.Requesthandler
 	public class GetCarsRequestHandler : IHandleMessages<GetCarsRequest>
 	{
 		readonly DbContextOptionsBuilder<CarApiContext> _dbContextOptionsBuilder;
-		public GetCarsRequestHandler(DbContextOptionsBuilder<CarApiContext> dbContextOptionsBuilder)
+		public GetCarsRequestHandler()
 		{
-			_dbContextOptionsBuilder = dbContextOptionsBuilder;
+			_dbContextOptionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
 		}
 
 		static ILog log = LogManager.GetLogger<GetCarsRequestHandler>();
