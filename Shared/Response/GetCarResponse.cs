@@ -2,16 +2,15 @@ using NServiceBus;
 using System;
 using Shared.Models;
 
-namespace Shared.Response
+namespace Shared.Responses
 {
 	[Serializable]
-	public class GetCarResponse : IMessage
+	public class GetCarResponse : Response
 	{
 		public GetCarResponse()
 		{
 			DataId = Guid.NewGuid();
 		}
-		public Guid DataId { get; set; }
 		public Car Car { get; set; }
 	}
 }

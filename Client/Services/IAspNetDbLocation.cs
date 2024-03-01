@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using Shared.Response;
+using Shared.Responses;
 
 namespace Client.Services
 {

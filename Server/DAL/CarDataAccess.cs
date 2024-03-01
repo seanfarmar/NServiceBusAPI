@@ -9,19 +9,16 @@ namespace Server.DAL
 
 	public class CarDataAccess
 	{
-		readonly DbContextOptionsBuilder<CarApiContext> _optionsBuilder =
-            new DbContextOptionsBuilder<CarApiContext>();
+		readonly CarApiContext _dbContext;
 
-		DbContextOptionsBuilder<CarApiContext> OptionsBuilder => _optionsBuilder;
-
-		public CarDataAccess()
+		public CarDataAccess(CarApiContext dbContext)
         {
-            _optionsBuilder.UseSqlite("DataSource=App_Data/Car.db");
+			_dbContext = dbContext;
         }
 
 	    public ICollection<Car> GetCars()
 	    {
-		    using (var context = new CarApiContext(OptionsBuilder.Options))
+		    using (var context = _dbContext)
 		    {
 			    return context.Cars.ToList();
 		    }
@@ -29,7 +26,7 @@ namespace Server.DAL
 
 	    public Car GetCar(Guid id)
 	    {
-		    using (var context = new CarApiContext(OptionsBuilder.Options))
+		    using (var context = _dbContext)
 		    {
 			    return context.Cars.SingleOrDefault(o => o.Id == id);
 		    }
@@ -37,7 +34,7 @@ namespace Server.DAL
 
 	    public void AddCar(Car car)
 	    {
-		    using (var context = new CarApiContext(OptionsBuilder.Options))
+		    using (var context = _dbContext)
 		    {
 			    context.Cars.Add(car);
 			    context.SaveChanges();
@@ -46,7 +43,7 @@ namespace Server.DAL
 
 	    public void DeleteCar(Guid id)
 	    {
-		    using (var context = new CarApiContext(OptionsBuilder.Options))
+		    using (var context = _dbContext)
 		    {
 			    var Car = GetCar(id);
 			    context.Cars.Remove(Car);
@@ -56,7 +53,7 @@ namespace Server.DAL
 
 		public void UpdateCar(Car car)
 		{
-			using (var context = new CarApiContext(OptionsBuilder.Options))
+			using (var context = _dbContext)
 			{
 				context.Cars.Update(car);
 				context.SaveChanges();
@@ -65,7 +62,7 @@ namespace Server.DAL
 
 		public ICollection<Company> GetCompanies()
         {
-            using (var context = new CarApiContext(OptionsBuilder.Options))
+            using (var context = _dbContext)
             {
                 return context.Companies.ToList();
             }
@@ -73,7 +70,7 @@ namespace Server.DAL
 
         public Company GetCompany(Guid id)
         {
-            using (var context = new CarApiContext(OptionsBuilder.Options))
+            using (var context = _dbContext)
             {
                 return context.Companies.SingleOrDefault(o => o.Id == id);
             }
@@ -81,7 +78,7 @@ namespace Server.DAL
 
         public void AddCompany(Company company)
         {
-            using (var context = new CarApiContext(OptionsBuilder.Options))
+            using (var context = _dbContext)
             {
                 context.Companies.Add(company);
                 context.SaveChanges();
@@ -90,7 +87,7 @@ namespace Server.DAL
 
         public void DeleteCompany(Guid id)
         {
-            using (var context = new CarApiContext(OptionsBuilder.Options))
+            using (var context = _dbContext)
             {
                 var company = GetCompany(id);
                 context.Companies.Remove(company);
@@ -100,7 +97,7 @@ namespace Server.DAL
 
 		public void UpdateCompany(Company company)
 		{
-			using (var context = new CarApiContext(OptionsBuilder.Options))
+			using (var context = _dbContext)
 			{
 				context.Companies.Update(company);
 				context.SaveChanges();

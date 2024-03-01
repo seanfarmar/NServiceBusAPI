@@ -1,10 +1,10 @@
 using NServiceBus;
 using System;
 
-namespace Shared.Response
+namespace Shared.Responses
 {
 	[Serializable]
-	public class DeleteCompanyResponse : IMessage
+	public class DeleteCompanyResponse : Response
 	{
 		public DeleteCompanyResponse()
 		{

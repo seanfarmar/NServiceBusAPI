@@ -3,16 +3,15 @@ using System;
 
 using Shared.Models;
 
-namespace Shared.Response
+namespace Shared.Responses
 {
 	[Serializable]
-	public class GetCompanyResponse : IMessage
+	public class GetCompanyResponse : Response
 	{
 		public GetCompanyResponse(Guid companyId)
 		{
 			DataId = Guid.NewGuid();
 		}
-		public Guid DataId { get; set; }
 		public Company Company { get; set; }
 	}
 }

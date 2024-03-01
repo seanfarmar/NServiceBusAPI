@@ -14,9 +14,9 @@ namespace Client.Controllers
 	public class HomeController : Controller
 	{
 		readonly IEndpointInstance _endpointInstance;
-		public HomeController(IEndpointInstance endPointEndpointInstance)
+		public HomeController(IEndpointInstance endpointInstance)
 		{
-			_endpointInstance = endPointEndpointInstance;
+			_endpointInstance = endpointInstance;
 		}
 
 		public async Task<IActionResult> Index()

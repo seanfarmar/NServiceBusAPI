@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using NServiceBus.Logging;
 using Shared.Requests;
 using System;
-using Shared.Response;
+using Shared.Responses;
 using System.Linq;
 using Server.DAL;
 using System.Collections.Generic;

@@ -4,12 +4,11 @@ using NServiceBus;
 namespace Shared.Requests
 {
 	[Serializable]
-	public class GetAspNetDbRequest : IMessage
-	{
+	public class GetAspNetDbRequest : Request
+  {
 		public GetAspNetDbRequest()
 		{
 			DataId = Guid.NewGuid();
 		}
-		public Guid DataId { get; set; }
 	}
 }

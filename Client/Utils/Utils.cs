@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using NServiceBus;
 using Shared.Requests;
-using Shared.Response;
+using Shared.Responses;
 using Shared.Models;
 
 namespace Client.Utils

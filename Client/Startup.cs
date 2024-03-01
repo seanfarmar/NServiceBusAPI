@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Data.SqlClient;
+using NServiceBus.Transport.SqlServer;
 
 namespace Client
 {
@@ -29,25 +30,36 @@ namespace Client
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
-			var endpointConfiguration = new EndpointConfiguration("NServiceBusCore.Client");
-      var transport = endpointConfiguration.UseTransport<SqlServerTransport>();
-      var transportConnectionString = Configuration.GetConnectionString("NServiceBusTransport");
-      endpointConfiguration.UseTransport(new SqlServerTransport(transportConnectionString)
-      {
-        TransportTransactionMode = TransportTransactionMode.SendsAtomicWithReceive
-      });
+      var endpointConfiguration = new EndpointConfiguration("NServiceBusCore.Client");
+      endpointConfiguration.SendFailedMessagesTo("error");
+      endpointConfiguration.EnableInstallers();
 
-      var persistence = endpointConfiguration.UsePersistence<SqlPersistence>();
-      persistence.SqlDialect<SqlDialect.MsSqlServer>();
-      var persistenceConnectionString = Configuration.GetConnectionString("NServiceBusPersistence");
-      persistence.ConnectionBuilder(connectionBuilder: () => new SqlConnection(persistenceConnectionString));
+      var connectionString = Configuration.GetConnectionString("NServiceBusTransport");
+      var transport = new SqlServerTransport(connectionString)
+      {
+        DefaultSchema = "dbo",
+        Subscriptions =
+            {
+                SubscriptionTableName = new SubscriptionTableName(
+                        table: "Subscriptions",
+                        schema: "dbo")
+            },
+        TransportTransactionMode = TransportTransactionMode.SendsAtomicWithReceive
+      };
+
+      transport.SchemaAndCatalog.UseSchemaForQueue("error", "dbo");
+      transport.SchemaAndCatalog.UseSchemaForQueue("audit", "dbo");
+      transport.SchemaAndCatalog.UseSchemaForQueue("NServiceBusCore.Client", "dbo");
+
+      endpointConfiguration.UseSerialization<SystemJsonSerializer>();
+      var routing = endpointConfiguration.UseTransport(transport);
 
       endpointConfiguration.MakeInstanceUniquelyAddressable("1");
-			endpointConfiguration.EnableCallbacks();
+      //routing.RouteToEndpoint(typeof(Request), "NServiceBusCore.Server");
+      endpointConfiguration.EnableCallbacks();
+      EndpointInstance = Endpoint.Start(endpointConfiguration).ConfigureAwait(false).GetAwaiter().GetResult();
 
-			EndpointInstance = Endpoint.Start(endpointConfiguration).GetAwaiter().GetResult();
-
-			services.AddSingleton(EndpointInstance);
+      services.AddSingleton(EndpointInstance);
 
 			services.AddIdentity<ApplicationUser, IdentityRole>()
 				.AddEntityFrameworkStores<ApplicationDbContext>()
@@ -90,7 +102,7 @@ namespace Client
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-		public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
+		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
       if (env.IsDevelopment())
       {

@@ -1,22 +1,23 @@
-using System;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NServiceBus;
-using Microsoft.EntityFrameworkCore;
-using Server.Requesthandler;
+using NServiceBus.Transport.SqlServer;
 using Server.DAL;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Configuration;
-using System.Data.SqlClient;
+using Server.Requesthandler;
+using Shared;
+using System;
 using System.ComponentModel;
 
 namespace Server
 {
-	public class Startup
+  public class Startup
 	{
     IContainer ApplicationContainer { get; set; }
     IConfiguration Configuration { get; }
+
+    IEndpointInstance EndpointInstance { get; set; }
 
     public Startup(IConfiguration configuration)
     {
@@ -43,24 +44,42 @@ namespace Server
 
       // Configure NServiceBus endpoint
       var endpointConfiguration = new EndpointConfiguration("NServiceBusCore.Server");
-      endpointConfiguration.EnableCallbacks(makesRequests: false);
+      endpointConfiguration.SendFailedMessagesTo("error");
+      endpointConfiguration.AuditProcessedMessagesTo("audit");
+      endpointConfiguration.EnableInstallers();
 
-      var persistence = endpointConfiguration.UsePersistence<SqlPersistence,StorageType.Sagas>();
-      persistence.SqlDialect<SqlDialect.MsSqlServer>();
-      var persistenceConnectionString = Configuration.GetConnectionString("NServiceBusPersistence");
-      persistence.ConnectionBuilder(
-          connectionBuilder: () => new SqlConnection(persistenceConnectionString));
+      var connectionString = Configuration.GetConnectionString("NServiceBusTransport");
 
-      var transportConnectionString = Configuration.GetConnectionString("NServiceBusTransport");
-      endpointConfiguration.UseTransport(new SqlServerTransport(transportConnectionString)
+      var transport = new SqlServerTransport(connectionString)
       {
-        TransportTransactionMode = TransportTransactionMode.SendsAtomicWithReceive
-      });
+        DefaultSchema = "dbo",
+        TransportTransactionMode = TransportTransactionMode.SendsAtomicWithReceive,
+        Subscriptions =
+            {
+                CacheInvalidationPeriod = TimeSpan.FromMinutes(1),
+                SubscriptionTableName = new SubscriptionTableName(table: "Subscriptions", schema: "dbo")
+            }
+      };
 
-      var endpointInstance = Endpoint.Start(endpointConfiguration).GetAwaiter().GetResult();
+      transport.SchemaAndCatalog.UseSchemaForQueue("error", "dbo");
+      transport.SchemaAndCatalog.UseSchemaForQueue("audit", "dbo");
+      transport.SchemaAndCatalog.UseSchemaForQueue("NServiceBusCore.Client", "client");
 
-      // Register the IEndpointInstance with the service collection
-      services.AddSingleton(endpointInstance);
+      endpointConfiguration.UseSerialization<SystemJsonSerializer>();
+      var routing = endpointConfiguration.UseTransport(transport);
+      SqlHelper.CreateSchema(connectionString, "server").GetAwaiter().GetResult();
+      endpointConfiguration.MakeInstanceUniquelyAddressable("1");
+      //routing.RouteToEndpoint(typeof(Response), "NServiceBusCore.Client");
+
+
+
+      //var allText = File.ReadAllText("Startup.sql");
+      //await SqlHelper.ExecuteSql(connectionString, allText);
+      EndpointInstance = Endpoint.Start(endpointConfiguration).ConfigureAwait(false).GetAwaiter().GetResult();
+      services.AddSingleton(EndpointInstance);
+      //Console.WriteLine("Server, Press any key to exit");
+      //Console.ReadKey();
+      //await EndpointInstance.Stop();
     }
     public void Configure(IApplicationLifetime appLifetime)
     {

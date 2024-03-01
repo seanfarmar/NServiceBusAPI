@@ -22,8 +22,6 @@
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
-    <PackageReference Include="NServiceBus" Version="8.0.5" />
-    <PackageReference Include="NServiceBus.Callbacks" Version="4.0.0" />
     <PackageReference Include="NServiceBus.Persistence.Sql" Version="7.0.4" />
     <PackageReference Include="NServiceBus.Transport.SqlServer" Version="7.0.5" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />

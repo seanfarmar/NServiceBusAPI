@@ -1,7 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using NServiceBus;
 using Shared.Requests;
-using Shared.Response;
+using Shared.Responses;
 
 namespace Client.Services
 {
