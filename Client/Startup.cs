@@ -1,24 +1,22 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using NServiceBus;
 using Client.DAL;
+using Client.Models;
 using Client.Services;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
-using Client.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using NServiceBus;
+using NServiceBus.Transport.SqlServer;
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Data.SqlClient;
-using NServiceBus.Transport.SqlServer;
 
 namespace Client
 {
-	public class Startup
+  public class Startup
 	{
     public Startup(IConfiguration configuration)
     {
@@ -72,8 +70,7 @@ namespace Client
 
 			var task = ConfigureServicesAsync(services);
 
-			task.Wait();
-
+			//task.Wait();
 		}
 
 		async Task ConfigureServicesAsync(IServiceCollection services)

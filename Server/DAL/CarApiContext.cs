@@ -10,7 +10,7 @@ namespace Server.DAL
 		{
 		}
 
-		public DbSet<Car> Cars { get; set; }
+    public DbSet<Car> Cars { get; set; }
 
 		public DbSet<Company> Companies { get; set; }
 	}

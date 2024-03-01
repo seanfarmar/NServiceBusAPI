@@ -30,7 +30,6 @@ namespace Server
       services.AddDbContext<CarApiContext>(options =>
           options.UseSqlite("DataSource=App_Data/Car.db"));
 
-      services.AddTransient<DbContextOptionsBuilder<CarApiContext>>();
       services.AddTransient<CreateCarRequestHandler>();
       services.AddTransient<CreateCompanyRequestHandler>();
       services.AddTransient<DeleteCarRequestHandler>();
@@ -41,6 +40,7 @@ namespace Server
       services.AddTransient<GetCompaniesRequestHandler>();
       services.AddTransient<UpdateCarRequestHandler>();
       services.AddTransient<UpdateCompanyRequestHandler>();
+      services.AddTransient<DbContextOptionsBuilder<CarApiContext>>();
 
       // Configure NServiceBus endpoint
       var endpointConfiguration = new EndpointConfiguration("NServiceBusCore.Server");
@@ -80,6 +80,8 @@ namespace Server
       //Console.WriteLine("Server, Press any key to exit");
       //Console.ReadKey();
       //await EndpointInstance.Stop();
+      //var serviceProvider = services.BuildServiceProvider();
+      //var someService = serviceProvider.GetService<DbContextOptionsBuilder<CarApiContext>>();
     }
     public void Configure(IApplicationLifetime appLifetime)
     {
