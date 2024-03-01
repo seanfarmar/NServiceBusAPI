@@ -11,6 +11,6 @@ namespace Shared.Requests
 			DataId = Guid.NewGuid();
 			CarId = id;
 		}
-		public Guid CarId;
-	}
+		public Guid CarId { get; set; }
+  }
 }

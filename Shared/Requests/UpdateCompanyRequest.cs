@@ -12,6 +12,6 @@ namespace Shared.Requests
 			DataId = Guid.NewGuid();
 			Company = company;
 		}
-		public Company Company;
-	}
+		public Company Company { get; set; }
+  }
 }

@@ -5,7 +5,8 @@ using System.Collections.Generic;
 
 namespace Shared.Models
 {
-	public class Company
+  [Serializable]
+  public class Company
 	{
 		public Company()
 		{

@@ -5,7 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Shared.Models
 {
-	public class Car
+  [Serializable]
+  public class Car
 	{
 		public Car()
 		{

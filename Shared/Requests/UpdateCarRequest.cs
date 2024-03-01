@@ -1,5 +1,4 @@
 using System;
-using NServiceBus;
 using Shared.Models;
 
 namespace Shared.Requests
@@ -12,6 +11,6 @@ namespace Shared.Requests
 			DataId = Guid.NewGuid();
 			Car = car;
 		}
-		public Car Car;
+		public Car Car { get; set; }
 	}
 }

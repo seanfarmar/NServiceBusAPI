@@ -4,6 +4,7 @@ using Client.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -59,18 +60,7 @@ namespace Client
 
       services.AddSingleton(EndpointInstance);
 
-			services.AddIdentity<ApplicationUser, IdentityRole>()
-				.AddEntityFrameworkStores<ApplicationDbContext>()
-				.AddDefaultTokenProviders();
-
-			//// Add application services.
-			services.AddTransient<IEmailSender, EmailSender>();
-
-			services.AddMvc();
-
-			var task = ConfigureServicesAsync(services);
-
-			//task.Wait();
+			ConfigureServicesAsync(services).GetAwaiter().GetResult();
 		}
 
 		async Task ConfigureServicesAsync(IServiceCollection services)
@@ -98,6 +88,16 @@ namespace Client
 			}
 
       services.AddTransient<ApplicationDbContext>();
+      services.AddTransient<IdentityDbContext<ApplicationUser>>();
+
+      services.AddIdentity<ApplicationUser, IdentityRole>()
+        .AddEntityFrameworkStores<ApplicationDbContext>()
+        .AddDefaultTokenProviders();
+
+      //// Add application services.
+      services.AddTransient<IEmailSender, EmailSender>();
+
+      services.AddMvc();
     }
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

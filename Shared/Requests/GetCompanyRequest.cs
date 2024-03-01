@@ -11,6 +11,6 @@ namespace Shared.Requests
 			DataId = Guid.NewGuid();
 			CompanyId = id;
 		}
-		public Guid CompanyId;
+		public Guid CompanyId { get; set; }
 	}
 }
