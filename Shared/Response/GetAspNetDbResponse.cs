@@ -12,9 +12,10 @@ namespace Shared.Responses
 		}
 
     public Guid DataId { get; set; }
-    public string AspNetDb { get; set; }
+		public string AspNetDb { get; set; } = AppDomain.CurrentDomain.BaseDirectory + "App_Data\\AspNet.db";
 
-		public static implicit operator string(GetAspNetDbResponse v)
+
+    public static implicit operator string(GetAspNetDbResponse v)
 		{
 			throw new NotImplementedException();
 		}

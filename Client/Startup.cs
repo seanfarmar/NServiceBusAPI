@@ -83,9 +83,13 @@ namespace Client
 			}
 			else
 			{
-				services.AddDbContext<ApplicationDbContext>(options =>
-					options.UseSqlite("Data Source=" + Directory.GetCurrentDirectory() + "\\App_Data\\AspNet.db"));
-			}
+        var dbPath = "Data Source=" + AppDomain.CurrentDomain.BaseDirectory + "App_Data\\AspNet.db";
+        dbPath = dbPath.Replace("Client", "Server");
+
+        services.AddDbContext<ApplicationDbContext>(options =>
+					options.UseSqlite(dbPath));
+
+      }
 
       services.AddTransient<ApplicationDbContext>();
       services.AddTransient<IdentityDbContext<ApplicationUser>>();
