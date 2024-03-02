@@ -15,10 +15,12 @@ namespace Server.Requesthandler
 	{
 		readonly DbContextOptionsBuilder<CarApiContext> _dbContextOptionsBuilder;
     readonly CarApiContext _dbContext;
+    readonly CarUnitOfWork _unitOfWork;
     public UpdateCarRequestHandler()
 		{
 			_dbContextOptionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
       _dbContext = new CarApiContext(_dbContextOptionsBuilder.Options);
+      _unitOfWork = new CarUnitOfWork(_dbContext);
     }
 
 		static ILog log = LogManager.GetLogger<UpdateCarRequestHandler>();
@@ -26,9 +28,9 @@ namespace Server.Requesthandler
     public Task Handle(UpdateCarRequest message, IMessageHandlerContext context)
     {
       log.Info("Received UpdateCarRequest.");
-      using var unitOfWork = new CarUnitOfWork(_dbContext);
+      
 
-      var allCars = unitOfWork.Cars.GetAll();
+      var allCars = _unitOfWork.Cars.GetAll();
       var originalCar = allCars.Where(c => c.Id == message.Car.Id).SingleOrDefault();
 
       if (originalCar != null)
@@ -37,7 +39,7 @@ namespace Server.Requesthandler
         {
           _dbContext.Entry(originalCar).State = EntityState.Detached;
           _dbContext.Attach(message.Car);
-          unitOfWork.Complete();
+          _unitOfWork.Complete();
         }
         // else: No changes, so no need to update
       }
