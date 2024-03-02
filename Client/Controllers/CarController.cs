@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Client.Models;
 using NServiceBus;
 using Client.Models.CarViewModel;
-using Microsoft.AspNetCore.Cors;
 using Shared.Models;
 
 namespace Client.Controllers
@@ -26,7 +25,6 @@ namespace Client.Controllers
 		}
 
 		[HttpGet]
-		//[EnableCors("AllowAllOrigins")]
 		public async Task<IActionResult> GetAllCars()
 		{
 			var getCarsResponse = await Utils.Utils.GetCarsResponseAsync(_endpointInstance);
