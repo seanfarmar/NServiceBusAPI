@@ -22,9 +22,7 @@
 	    public ICarRepository Cars { get; private set; }
 	    public ICompanyRepository Companies { get; private set; }
 
-		public CarApiContext Context => Context1;
-
-		public CarApiContext Context1 => _context;
+		public CarApiContext Context => _context;
 
 		public int Complete()
 		{
