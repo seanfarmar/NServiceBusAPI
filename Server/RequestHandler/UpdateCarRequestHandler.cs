@@ -13,17 +13,18 @@ namespace Server.Requesthandler
 {
 	public class UpdateCarRequestHandler : IHandleMessages<UpdateCarRequest>
 	{
-		readonly DbContextOptionsBuilder<CarApiContext> _dbContextOptionsBuilder;
-    readonly CarApiContext _dbContext;
     readonly CarUnitOfWork _unitOfWork;
+    readonly CarApiContext _dbContext;
+
     public UpdateCarRequestHandler()
-		{
-			_dbContextOptionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
-      _dbContext = new CarApiContext(_dbContextOptionsBuilder.Options);
+    {
+      var dbContextOptionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
+          dbContextOptionsBuilder.UseSqlite("DataSource=App_Data/Car.db");
+      _dbContext = new CarApiContext(dbContextOptionsBuilder.Options);
       _unitOfWork = new CarUnitOfWork(_dbContext);
     }
 
-		static ILog log = LogManager.GetLogger<UpdateCarRequestHandler>();
+    static ILog log = LogManager.GetLogger<UpdateCarRequestHandler>();
 
     public Task Handle(UpdateCarRequest message, IMessageHandlerContext context)
     {

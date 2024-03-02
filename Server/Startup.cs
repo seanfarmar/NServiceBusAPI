@@ -10,6 +10,7 @@ using Server.Requesthandler;
 using Shared;
 using System;
 using System.ComponentModel;
+using System.IO;
 
 namespace Server
 {
@@ -28,10 +29,15 @@ namespace Server
     // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
     {
-      services.AddDbContext<CarApiContext>(options =>
-          options.UseSqlite("DataSource=App_Data/Car.db"));
+      var appDataPath = Path.Combine(AppContext.BaseDirectory, "App_Data");
+      var dbFilePath = Path.Combine(appDataPath, "Car.db");
 
-      services.AddTransient<CarApiContext>();
+      var dbContextOptionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
+      dbContextOptionsBuilder.UseSqlite($"Data Source={dbFilePath}");
+
+      services.AddDbContext<CarApiContext>(options =>
+          options.UseSqlite($"Data Source={dbFilePath}"));
+
       services.AddTransient<CreateCarRequestHandler>();
       services.AddTransient<CreateCompanyRequestHandler>();
       services.AddTransient<DeleteCarRequestHandler>();
@@ -42,7 +48,7 @@ namespace Server
       services.AddTransient<GetCompaniesRequestHandler>();
       services.AddTransient<UpdateCarRequestHandler>();
       services.AddTransient<UpdateCompanyRequestHandler>();
-      
+
       CarApiExtensions.InitSqLiteDb();
       
       // Configure NServiceBus endpoint
