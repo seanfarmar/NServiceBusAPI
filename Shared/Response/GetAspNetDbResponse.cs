@@ -4,13 +4,15 @@ using System;
 namespace Shared.Responses
 {
 	[Serializable]
-	public class GetAspNetDbResponse : Response
+	public class GetAspNetDbResponse : IMessage
 	{
 		public GetAspNetDbResponse()
 		{
 			DataId = Guid.NewGuid();
 		}
-		public string AspNetDb { get; set; }
+
+    public Guid DataId { get; set; }
+    public string AspNetDb { get; set; }
 
 		public static implicit operator string(GetAspNetDbResponse v)
 		{

@@ -41,9 +41,9 @@ namespace Client.Utils
 		    return responseTask;
 	    }
 
-	    public static Task<GetCarResponse> GetCarResponseAsync(Guid id, IEndpointInstance endpointInstance)
+	    public static Task<GetCarResponse> GetCarResponseAsync(Guid carId, IEndpointInstance endpointInstance)
 	    {
-		    var message = new GetCarRequest(id);
+		    var message = new GetCarRequest(carId);
 		    var sendOptions = new SendOptions();
 		    sendOptions.SetDestination("NServiceBusCore.Server");
 		    var responseTask = endpointInstance
@@ -51,9 +51,9 @@ namespace Client.Utils
 		    return responseTask;
 	    }
 
-	    public static Task<DeleteCarResponse> DeleteCarResponseAsync(Guid id, IEndpointInstance endpointInstance)
+	    public static Task<DeleteCarResponse> DeleteCarResponseAsync(Guid carId, IEndpointInstance endpointInstance)
 		{
-		    var message = new DeleteCarRequest(id);
+		    var message = new DeleteCarRequest(carId);
 		    var sendOptions = new SendOptions();
 		    sendOptions.SetDestination("NServiceBusCore.Server");
 		    var responseTask = endpointInstance
@@ -73,12 +73,19 @@ namespace Client.Utils
 
 	    public static Task<GetCarsResponse> GetCarsResponseAsync(IEndpointInstance endpointInstance)
 	    {
-		    var message = new GetCarsRequest();
-		    var sendOptions = new SendOptions();
-		    sendOptions.SetDestination("NServiceBusCore.Server");
-		    var responseTask = endpointInstance
-			    .Request<GetCarsResponse>(message, sendOptions);
-		    return responseTask;
+			try
+			{
+				var message = new GetCarsRequest();
+				var sendOptions = new SendOptions();
+				sendOptions.SetDestination("NServiceBusCore.Server");
+				var responseTask = endpointInstance
+					.Request<GetCarsResponse>(message, sendOptions);
+				return responseTask;
+			}catch (Exception ex)
+			{
+				var a = ex;
+				throw;
+			}
 	    }
 	    public async Task<bool> CompanyExistsAsync(Guid id, IEndpointInstance endpointInstance)
 		{

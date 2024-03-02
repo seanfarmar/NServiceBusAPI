@@ -29,6 +29,8 @@ namespace Client
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
+      ConfigureServicesAsync(services).GetAwaiter().GetResult();
+
       var endpointConfiguration = new EndpointConfiguration("NServiceBusCore.Client");
       endpointConfiguration.SendFailedMessagesTo("error");
       endpointConfiguration.EnableInstallers();
@@ -59,8 +61,6 @@ namespace Client
       EndpointInstance = Endpoint.Start(endpointConfiguration).ConfigureAwait(false).GetAwaiter().GetResult();
 
       services.AddSingleton(EndpointInstance);
-
-			ConfigureServicesAsync(services).GetAwaiter().GetResult();
 		}
 
 		async Task ConfigureServicesAsync(IServiceCollection services)
@@ -98,6 +98,8 @@ namespace Client
       services.AddTransient<IEmailSender, EmailSender>();
 
       services.AddMvc();
+
+      services.AddCors();
     }
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -111,9 +113,17 @@ namespace Client
       {
         app.UseExceptionHandler("/Home/Error");
       }
+
       app.UseStaticFiles();
 
 			app.UseAuthentication();
+      
+      app.UseCors(builder =>
+      {
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+      });
 
       app.UseRouting(); // Use routing middleware
 

@@ -24,10 +24,23 @@ namespace Server.Requesthandler
 			log.Info("Received UpdateCompanyRequest");
 			using (var unitOfWork = new CarUnitOfWork(new CarApiContext(_dbContextOptionsBuilder.Options)))
 			{
-				unitOfWork.Companies.Update(message.Company);
-				unitOfWork.Complete();
+				var existingCompany = unitOfWork.Companies.Get(message.Company.Id);
+				if (existingCompany != null)
+				{
+					if (!Equals(existingCompany, message.Company))
+					{
+						existingCompany = message.Company;
+            unitOfWork.Companies.Update(message.Company);
+						unitOfWork.Complete();
+					}
+				}
+				else
+				{
+					throw new Exception("Cannot update company, not fund in database");
+				}
 			}
-			var response = new UpdateCompanyResponse()
+
+        var response = new UpdateCompanyResponse()
 			{
 				DataId = Guid.NewGuid(),
 				Company = message.Company

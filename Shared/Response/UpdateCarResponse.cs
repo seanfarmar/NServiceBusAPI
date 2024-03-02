@@ -5,13 +5,15 @@ using Shared.Models;
 namespace Shared.Responses
 {
 	[Serializable]
-	public class UpdateCarResponse : Response
+	public class UpdateCarResponse : IMessage
 	{
 		public UpdateCarResponse()
 		{
 			DataId = Guid.NewGuid();
 		}
-		public Car Car { get; set; }
+
+    public Guid DataId { get; set; }
+    public Car Car { get; set; }
 	}
 }
 

@@ -2,12 +2,13 @@
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Shared.Models
 {
   [Serializable]
-  public class Car
-	{
+  public class Car : IEquatable<Car>
+  {
 		public Car()
 		{
 			Id = Guid.NewGuid();
@@ -19,6 +20,8 @@ namespace Shared.Models
 		{
 			CompanyId = companyId;
 		}
+
+		[Key]
 		public Guid Id { get; set; }
 		public Guid CompanyId { get; set; }
 
@@ -42,5 +45,30 @@ namespace Shared.Models
 		public string OnlineOrOffline => (this.Online) ? "Online" : "Offline";
 
 		public bool Disabled { get; set; } //Used to block changes of Online/Offline status
-	}
+
+    public override bool Equals(object obj)
+    {
+      if (obj == null || !(obj is Car))
+      {
+        return false;
+      }
+
+      return Equals((Car)obj);
+    }
+
+    public bool Equals(Car other)
+    {
+      if (other == null)
+      {
+        return false;
+      }
+
+      return GetHashCode() == other.GetHashCode();
+    }
+
+    public override int GetHashCode()
+    {
+      return HashCode.Combine(CompanyId, Id, CreationTime, Disabled, VIN, RegNr, Online, Disabled);
+    }
+  }
 }

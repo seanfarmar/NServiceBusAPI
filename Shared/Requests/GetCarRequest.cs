@@ -4,13 +4,15 @@ using NServiceBus;
 namespace Shared.Requests
 {
 	[Serializable]
-	public class GetCarRequest : Request
+	public class GetCarRequest : IMessage
   {
-		public GetCarRequest(Guid id)
+		public GetCarRequest(Guid carId)
 		{
 			DataId = Guid.NewGuid();
-			CarId = id;
+			CarId = carId;
 		}
-		public Guid CarId { get; set; }
+
+    public Guid DataId { get; set; }
+    public Guid CarId { get; set; }
   }
 }

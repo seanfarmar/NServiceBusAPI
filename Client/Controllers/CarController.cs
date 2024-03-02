@@ -26,7 +26,7 @@ namespace Client.Controllers
 		}
 
 		[HttpGet]
-		[EnableCors("AllowAllOrigins")]
+		//[EnableCors("AllowAllOrigins")]
 		public async Task<IActionResult> GetAllCars()
 		{
 			var getCarsResponse = await Utils.Utils.GetCarsResponseAsync(_endpointInstance);

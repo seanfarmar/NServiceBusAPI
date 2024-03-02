@@ -4,12 +4,14 @@ using System;
 namespace Shared.Responses
 {
 	[Serializable]
-	public class DeleteCarResponse : Response
+	public class DeleteCarResponse : IMessage
 	{
 		public DeleteCarResponse()
 		{
 			DataId = Guid.NewGuid();
 		}
-	}
+
+    public Guid DataId { get; set; }
+  }
 }
 

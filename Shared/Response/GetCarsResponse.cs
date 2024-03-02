@@ -6,12 +6,14 @@ using Shared.Models;
 namespace Shared.Responses
 {
 	[Serializable]
-	public class GetCarsResponse : Response
+	public class GetCarsResponse : IMessage
 	{
 		public GetCarsResponse()
 		{
 			DataId = Guid.NewGuid();
 		}
+
+		public Guid DataId { get; set; }
 		public List<Car> Cars { get; set; }
 	}
 }

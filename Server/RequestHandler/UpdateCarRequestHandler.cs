@@ -6,6 +6,9 @@ using Shared.Responses;
 using Server.DAL;
 using Microsoft.EntityFrameworkCore;
 using Server.Data;
+using System;
+using System.Linq;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Server.Requesthandler
 {
@@ -15,26 +18,41 @@ namespace Server.Requesthandler
 		public UpdateCarRequestHandler()
 		{
 			_dbContextOptionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
-		}
+      _dbContextOptionsBuilder.EnableSensitiveDataLogging();
+
+    }
 
 		static ILog log = LogManager.GetLogger<UpdateCarRequestHandler>();
 
-		public Task Handle(UpdateCarRequest message, IMessageHandlerContext context)
-		{
-			log.Info("Received UpdateCarRequest.");
+    public Task Handle(UpdateCarRequest message, IMessageHandlerContext context)
+    {
+      log.Info("Received UpdateCarRequest.");
+      using var unitOfWork = new CarUnitOfWork(new CarApiContext(_dbContextOptionsBuilder.Options));
 
-			using (var unitOfWork = new CarUnitOfWork(new CarApiContext(_dbContextOptionsBuilder.Options)))
-			{
-				unitOfWork.Cars.Update(message.Car);
-				unitOfWork.Complete();
-			}
+      var existingCar = unitOfWork.Cars.Get(message.Car.Id);
 
-			var response = new UpdateCarResponse
-			{
-				Car = message.Car
-			};
-			var reply = context.Reply(response);
-			return reply;
-		}
-	}
+      if (existingCar != null)
+      {
+        if (!Equals(existingCar, message.Car))
+        {
+          existingCar = message.Car;
+          unitOfWork.Cars.Update(existingCar);
+          unitOfWork.Complete();
+        }
+        // else: No changes, so no need to update
+      }
+      else
+      {
+        throw new Exception("Cannot update car, not found in database");
+      }
+
+
+      var response = new UpdateCarResponse
+      {
+        Car = message.Car
+      };
+      var reply = context.Reply(response);
+      return reply;
+    }
+  }
 }

@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using Shared.Models;
 
 namespace Server.DAL
 {
 
 
-	public static class ServerExtensions
+	public static class CarApiExtensions
 	{
 		public static void EnsureSeedData(this CarApiContext context)
 		{
@@ -69,5 +70,16 @@ namespace Server.DAL
 			}
 			context.SaveChanges();
 		}
-	}
+
+    static public void InitSqLiteDb()
+    {
+      DbContextOptionsBuilder<CarApiContext> _optionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
+      _optionsBuilder.UseSqlite("DataSource=App_Data/Car.db");
+      using (var context = new CarApiContext(_optionsBuilder.Options))
+      {
+        context.Database.EnsureCreated();
+        context.EnsureSeedData();
+      }
+    }
+  }
 }

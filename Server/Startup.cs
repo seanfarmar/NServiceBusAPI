@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using NServiceBus;
 using NServiceBus.Transport.SqlServer;
 using Server.DAL;
@@ -40,8 +41,10 @@ namespace Server
       services.AddTransient<GetCompanyRequestHandler>();
       services.AddTransient<GetCompaniesRequestHandler>();
       services.AddTransient<UpdateCarRequestHandler>();
-      services.AddTransient<UpdateCompanyRequestHandler>();     
-
+      services.AddTransient<UpdateCompanyRequestHandler>();
+      
+      CarApiExtensions.InitSqLiteDb();
+      
       // Configure NServiceBus endpoint
       var endpointConfiguration = new EndpointConfiguration("NServiceBusCore.Server");
       endpointConfiguration.SendFailedMessagesTo("error");
@@ -83,6 +86,7 @@ namespace Server
       //var serviceProvider = services.BuildServiceProvider();
       //var someService = serviceProvider.GetService<DbContextOptionsBuilder<CarApiContext>>();
     }
+
     public void Configure(IApplicationLifetime appLifetime)
     {
       appLifetime.ApplicationStopped.Register(() => ApplicationContainer.Dispose());

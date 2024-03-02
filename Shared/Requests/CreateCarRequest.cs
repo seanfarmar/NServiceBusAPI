@@ -6,13 +6,14 @@ namespace Shared.Requests
 {
 
 	[Serializable]
-	public class CreateCarRequest : Request
+	public class CreateCarRequest : IMessage
 	{
 		public CreateCarRequest(Car car)
 		{
 			DataId = Guid.NewGuid();
 			Car = car;
 		}
-		public Car Car { get; set; }
+    public Guid DataId { get; set; }
+    public Car Car { get; set; }
 	}
 }

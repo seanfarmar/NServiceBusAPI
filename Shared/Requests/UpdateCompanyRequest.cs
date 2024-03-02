@@ -5,13 +5,15 @@ using Shared.Models;
 namespace Shared.Requests
 {
 	[Serializable]
-	public class UpdateCompanyRequest : Request
+	public class UpdateCompanyRequest : IMessage
   {
 		public UpdateCompanyRequest(Company company)
 		{
 			DataId = Guid.NewGuid();
 			Company = company;
 		}
-		public Company Company { get; set; }
+
+    public Guid DataId { get; set; }
+    public Company Company { get; set; }
   }
 }
