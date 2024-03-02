@@ -98,7 +98,7 @@ namespace Client
         .AddEntityFrameworkStores<ApplicationDbContext>()
         .AddDefaultTokenProviders();
 
-      //// Add application services.
+
       services.AddTransient<IEmailSender, EmailSender>();
 
       services.AddMvc();
@@ -108,7 +108,7 @@ namespace Client
       services.AddAuthorization();
     }
 
-		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
       if (env.IsDevelopment())
@@ -125,6 +125,7 @@ namespace Client
       app.UseRouting();
 
       app.UseAuthentication(); 
+
       app.UseAuthorization();  
 
       app.UseEndpoints(endpoints =>

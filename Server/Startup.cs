@@ -26,11 +26,9 @@ namespace Server
       Configuration = configuration;
     }
 
-    // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
     {
-      var appDataPath = Path.Combine(AppContext.BaseDirectory, "App_Data");
-      var dbFilePath = Path.Combine(appDataPath, "Car.db");
+      var dbFilePath = Path.Combine(Path.Combine(AppContext.BaseDirectory, "App_Data"), "Car.db");
 
       var dbContextOptionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
       dbContextOptionsBuilder.UseSqlite($"Data Source={dbFilePath}");

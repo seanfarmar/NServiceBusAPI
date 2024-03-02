@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Server.Data;
 using System;
 using System.Linq;
+using System.IO;
 
 namespace Server.Requesthandler
 {
@@ -16,10 +17,12 @@ namespace Server.Requesthandler
     readonly CarUnitOfWork _unitOfWork;
     readonly CarApiContext _dbContext;
 
+    readonly string dbFilePath = Path.Combine(Path.Combine(AppContext.BaseDirectory, "App_Data"), "Car.db");
+    readonly DbContextOptionsBuilder dbContextOptionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
+
     public UpdateCarRequestHandler()
     {
-      var dbContextOptionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
-          dbContextOptionsBuilder.UseSqlite("DataSource=App_Data/Car.db");
+      dbContextOptionsBuilder.UseSqlite($"Data Source={dbFilePath}");
       _dbContext = new CarApiContext(dbContextOptionsBuilder.Options);
       _unitOfWork = new CarUnitOfWork(_dbContext);
     }
@@ -29,11 +32,8 @@ namespace Server.Requesthandler
     public Task Handle(UpdateCarRequest message, IMessageHandlerContext context)
     {
       log.Info("Received UpdateCarRequest.");
-      
-
-      var allCars = _unitOfWork.Cars.GetAll();
-      var originalCar = allCars.Where(c => c.Id == message.Car.Id).SingleOrDefault();
-
+    
+      var originalCar = _unitOfWork.Cars.GetAll().Where(c => c.Id == message.Car.Id).SingleOrDefault();
       if (originalCar != null)
       {
         if (!Equals(originalCar, message.Car))
