@@ -68,7 +68,22 @@ namespace Shared.Models
 
     public override int GetHashCode()
     {
-      return HashCode.Combine(CompanyId, Id, CreationTime, Disabled, VIN, RegNr, Online, Disabled);
+      return HashCode.Combine(CompanyId, Id, CreationTime, Disabled, VIN, RegNr, Online);
+    }
+
+		public Car Copy()
+    {
+      return new Car
+      {
+
+        CompanyId = CompanyId,
+        Id = Id,
+        CreationTime = CreationTime,
+        Disabled = Disabled,
+        VIN = VIN,
+        RegNr = RegNr,
+        Online = Online
+      };
     }
   }
 }

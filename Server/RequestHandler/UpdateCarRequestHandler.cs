@@ -8,18 +8,17 @@ using Microsoft.EntityFrameworkCore;
 using Server.Data;
 using System;
 using System.Linq;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Server.Requesthandler
 {
 	public class UpdateCarRequestHandler : IHandleMessages<UpdateCarRequest>
 	{
 		readonly DbContextOptionsBuilder<CarApiContext> _dbContextOptionsBuilder;
-		public UpdateCarRequestHandler()
+    readonly CarApiContext _dbContext;
+    public UpdateCarRequestHandler()
 		{
 			_dbContextOptionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
-      _dbContextOptionsBuilder.EnableSensitiveDataLogging();
-
+      _dbContext = new CarApiContext(_dbContextOptionsBuilder.Options);
     }
 
 		static ILog log = LogManager.GetLogger<UpdateCarRequestHandler>();
@@ -27,16 +26,17 @@ namespace Server.Requesthandler
     public Task Handle(UpdateCarRequest message, IMessageHandlerContext context)
     {
       log.Info("Received UpdateCarRequest.");
-      using var unitOfWork = new CarUnitOfWork(new CarApiContext(_dbContextOptionsBuilder.Options));
+      using var unitOfWork = new CarUnitOfWork(_dbContext);
 
-      var existingCar = unitOfWork.Cars.Get(message.Car.Id);
+      var allCars = unitOfWork.Cars.GetAll();
+      var originalCar = allCars.Where(c => c.Id == message.Car.Id).SingleOrDefault();
 
-      if (existingCar != null)
+      if (originalCar != null)
       {
-        if (!Equals(existingCar, message.Car))
+        if (!Equals(originalCar, message.Car))
         {
-          existingCar = message.Car;
-          unitOfWork.Cars.Update(existingCar);
+          _dbContext.Entry(originalCar).State = EntityState.Detached;
+          _dbContext.Attach(message.Car);
           unitOfWork.Complete();
         }
         // else: No changes, so no need to update
