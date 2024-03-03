@@ -16,14 +16,12 @@ namespace Server.Requesthandler
 	{
     readonly DbContextOptionsBuilder<CarApiContext> _dbContextOptionsBuilder;
     readonly CarUnitOfWork unitOfWork;
-    readonly List<Car> cars;
     readonly CarApiContext dbContext;
     public GetCarRequestHandler()
     {
       _dbContextOptionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
       dbContext = new CarApiContext(_dbContextOptionsBuilder.Options);
       unitOfWork = new CarUnitOfWork(dbContext);
-      cars = unitOfWork.Cars.GetAll().ToList();
     }
 
     static ILog log = LogManager.GetLogger<GetCarRequestHandler>();
@@ -31,9 +29,9 @@ namespace Server.Requesthandler
     public Task Handle(GetCarRequest message, IMessageHandlerContext context)
     {
       log.Info("Received GetCarRequest.");
-      Car car;
 
-      car = cars.Where(c => c.Id == message.CarId).SingleOrDefault();
+      var list = unitOfWork.Cars.GetAll();
+      var car = list.Where(c => c.Id == message.CarId).SingleOrDefault();
 
       var response = new GetCarResponse()
       {

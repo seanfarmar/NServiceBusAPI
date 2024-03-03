@@ -8,6 +8,7 @@ using Server.DAL;
 using Microsoft.EntityFrameworkCore;
 using Server.Data;
 using Shared.Models;
+using System.Linq;
 
 namespace Server.Requesthandler
 {
@@ -27,10 +28,12 @@ namespace Server.Requesthandler
 
 			Company company;
 			using (var unitOfWork = new CarUnitOfWork(new CarApiContext(_dbContextOptionsBuilder.Options)))
-			{
-				company = unitOfWork.Companies.Get(message.CompanyId);
-			}
-			var response = new GetCompanyResponse(message.CompanyId)
+      {
+        var list = unitOfWork.Companies.GetAll();
+        company = list.Where(c => c.Id == message.CompanyId).SingleOrDefault();
+      }
+
+      var response = new GetCompanyResponse(message.CompanyId)
 			{
 				DataId = Guid.NewGuid(),
 				Company = company
