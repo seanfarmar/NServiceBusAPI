@@ -30,9 +30,9 @@ namespace Server.Data
       Context.AddRange(entities);
     }
 
-    public IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> predicate)
+    public TEntity Find(params object[] keyValues)
     {
-      return Context.Set<TEntity>().Where(predicate);
+      return Context.Set<TEntity>().Find(keyValues);
     }
 
     public TEntity Get(Guid id)

@@ -8,7 +8,7 @@ namespace Server.Data
   {
     TEntity Get(Guid id);
     IEnumerable<TEntity> GetAll();
-    IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> predicate);
+    TEntity Find(params object[] keyValues);
     void Add(TEntity entity);
 
     void Update(TEntity entity);
