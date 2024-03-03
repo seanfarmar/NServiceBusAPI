@@ -2,7 +2,6 @@
 using System.Globalization;
 using Microsoft.AspNetCore;
 using System.IO;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 
 namespace Server
@@ -24,14 +23,7 @@ namespace Server
 
     static IWebHost BuildWebHost(string[] args) =>
       WebHost.CreateDefaultBuilder(args)
-        .UseKestrel()
-        .UseContentRoot(Directory.GetCurrentDirectory())
-        .UseIISIntegration()
         .UseStartup<Startup>()
-        .ConfigureLogging((hostingContext, logging) =>
-         {
-            logging.ClearProviders();
-         })
         .Build();
   }
 
