@@ -10,76 +10,76 @@ namespace Client.Utils
 {
 	public class Utils
     {
-	    public static Task<GetCompaniesResponse> GetCompaniesResponseAsync(IEndpointInstance endpointInstance)
+	    public static async Task<GetCompaniesResponse> GetCompaniesResponseAsync(IEndpointInstance endpointInstance)
 	    {
 		    var message = new GetCompaniesRequest();
 		    var sendOptions = new SendOptions();
 		    sendOptions.SetDestination("NServiceBusCore.Server");
-		    var responseTask = endpointInstance
+		    var responseTask = await endpointInstance
 			    .Request<GetCompaniesResponse>(message, sendOptions);
 		    return responseTask;
 	    }
 
-	    public static Task<GetCompanyResponse> GetCompanyResponseAsync(Guid id, IEndpointInstance endpointInstance)
+	    public static async Task<GetCompanyResponse> GetCompanyResponseAsync(Guid id, IEndpointInstance endpointInstance)
 	    {
 		    var message = new GetCompanyRequest(id);
 		    var sendOptions = new SendOptions();
 		    sendOptions.SetDestination("NServiceBusCore.Server");
-		    var responseTask = endpointInstance
-			    .Request<GetCompanyResponse>(message, sendOptions);
+		    var responseTask = await endpointInstance
+          .Request<GetCompanyResponse>(message, sendOptions);
 		    return responseTask;
 	    }
 
 
-	    public static Task<CreateCarResponse> CreateCarResponseAsync(Car car, IEndpointInstance endpointInstance)
+	    public static async Task<CreateCarResponse> CreateCarResponseAsync(Car car, IEndpointInstance endpointInstance)
 	    {
 		    var message = new CreateCarRequest(car);
 		    var sendOptions = new SendOptions();
 		    sendOptions.SetDestination("NServiceBusCore.Server");
-		    var responseTask = endpointInstance
-			    .Request<CreateCarResponse>(message, sendOptions);
+		    var responseTask = await endpointInstance
+          .Request<CreateCarResponse>(message, sendOptions);
 		    return responseTask;
 	    }
 
-	    public static Task<GetCarResponse> GetCarResponseAsync(Guid carId, IEndpointInstance endpointInstance)
+	    public static async Task<GetCarResponse> GetCarResponseAsync(Guid carId, IEndpointInstance endpointInstance)
 	    {
 		    var message = new GetCarRequest(carId);
 		    var sendOptions = new SendOptions();
 		    sendOptions.SetDestination("NServiceBusCore.Server");
-		    var responseTask = endpointInstance
-			    .Request<GetCarResponse>(message, sendOptions);
+		    var responseTask = await endpointInstance
+          .Request<GetCarResponse>(message, sendOptions);
 		    return responseTask;
 	    }
 
-	    public static Task<DeleteCarResponse> DeleteCarResponseAsync(Guid carId, IEndpointInstance endpointInstance)
+	    public static async Task<DeleteCarResponse> DeleteCarResponseAsync(Guid carId, IEndpointInstance endpointInstance)
 		{
 		    var message = new DeleteCarRequest(carId);
 		    var sendOptions = new SendOptions();
 		    sendOptions.SetDestination("NServiceBusCore.Server");
-		    var responseTask = endpointInstance
-			    .Request<DeleteCarResponse>(message, sendOptions);
+		    var responseTask = await endpointInstance
+          .Request<DeleteCarResponse>(message, sendOptions);
 		    return responseTask;
 	    }
 
-	    public static Task<UpdateCarResponse> UpdateCarResponseAsync(Car car, IEndpointInstance endpointInstance)
+	    public static async Task<UpdateCarResponse> UpdateCarResponseAsync(Car car, IEndpointInstance endpointInstance)
 		{
 		    var message = new UpdateCarRequest(car);
 		    var sendOptions = new SendOptions();
 		    sendOptions.SetDestination("NServiceBusCore.Server");
-		    var responseTask = endpointInstance
-			    .Request<UpdateCarResponse>(message, sendOptions);
+		    var responseTask = await endpointInstance
+          .Request<UpdateCarResponse>(message, sendOptions);
 		    return responseTask;
 	    }
 
-	    public static Task<GetCarsResponse> GetCarsResponseAsync(IEndpointInstance endpointInstance)
+	    public static async Task<GetCarsResponse> GetCarsResponseAsync(IEndpointInstance endpointInstance)
 	    {
 			try
 			{
 				var message = new GetCarsRequest();
 				var sendOptions = new SendOptions();
 				sendOptions.SetDestination("NServiceBusCore.Server");
-				var responseTask = endpointInstance
-					.Request<GetCarsResponse>(message, sendOptions);
+				var responseTask = await endpointInstance
+          .Request<GetCarsResponse>(message, sendOptions);
 				return responseTask;
 			}catch (Exception ex)
 			{
