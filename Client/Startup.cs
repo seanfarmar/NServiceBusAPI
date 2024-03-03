@@ -29,7 +29,7 @@ namespace Client
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
-      ConfigureServicesAsync(services).GetAwaiter().GetResult();
+      ConfigureServicesAsync(services);
 
       var endpointConfiguration = new EndpointConfiguration("NServiceBusCore.Client");
       endpointConfiguration.SendFailedMessagesTo("error");
@@ -63,33 +63,11 @@ namespace Client
       services.AddSingleton(EndpointInstance);
 		}
 
-		async Task ConfigureServicesAsync(IServiceCollection services)
+		void ConfigureServicesAsync(IServiceCollection services)
 		{
-			string aspNetDb = null;
-			var aspNetDbLocation = new AspNetDbLocation();
-			try
-			{
-				var getAspNetDb = await aspNetDbLocation.GetAspNetDbAsync(EndpointInstance);
-				aspNetDb = getAspNetDb.AspNetDb;
-			}
-			catch (Exception e)
-			{
-				//Do nothing
-			}
-			if (aspNetDb != null)
-			{
-				services.AddDbContext<ApplicationDbContext>(options =>
-					options.UseSqlite("Data Source=" + aspNetDb));
-			}
-			else
-			{
-        var dbPath = "Data Source=" + AppDomain.CurrentDomain.BaseDirectory + "App_Data\\AspNet.db";
-        dbPath = dbPath.Replace("Client", "Server");
-
-        services.AddDbContext<ApplicationDbContext>(options =>
-					options.UseSqlite(dbPath));
-
-      }
+      var dbFilePath = Path.Combine(Path.Combine(AppContext.BaseDirectory, "App_Data"), "AspNet.db");
+      services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlite($"Data Source={dbFilePath}"));
 
       services.AddTransient<ApplicationDbContext>();
       services.AddTransient<IdentityDbContext<ApplicationUser>>();
