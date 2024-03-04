@@ -5,14 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using System.Runtime.ConstrainedExecution;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using System.Threading;
 
 namespace Server.Data
 {
   public class CompanyRepository : ICompanyRepository
   {
     private readonly CarApiContext _context;
+    private readonly SemaphoreSlim _asyncLock = new(1, 1);
     public CompanyRepository(CarApiContext context)
     {
       _context = context;
@@ -21,46 +21,65 @@ namespace Server.Data
 
     public async Task<int> AddCompanyAsync(Company company)
     {
-      _context.Companies.Add(company);
-      return await _context.SaveChangesAsync();
+      await _asyncLock.WaitAsync();
+      try
+      {
+        _context.Companies.Add(company);
+        return await _context.SaveChangesAsync();
+      }
+      finally
+      {
+        _asyncLock.Release();
+      }
     }
 
     public async Task<int> RemoveCompanyAsync(Guid Id)
     {
-      var companies = await GetAllCompaniesAsync();
-      var foundCompany = companies.Where(c => c.Id == Id).FirstOrDefault() ?? throw new Exception($"Company with id '{Id}' not found in database");
-      _context.Companies.Remove(foundCompany);
-      return await _context.SaveChangesAsync();
-    }
-
-    public async Task<IEnumerable<Company>> GetAllCompaniesAsync()
-    {
-      return await _context.Companies.ToListAsync();
-    }
-
-    public async Task<Company> GetCompanyAsync(Guid Id)
-    {
-      var companies = await GetAllCompaniesAsync();
-      return companies.Where(c => c.Id == Id).SingleOrDefault();
-    }
-
-    public async Task<int> SaveContextChanges()
-    {
-      return await _context.SaveChangesAsync();
-    }
-
-    public async Task<int> UpdateCompanyAsync(Company company)
-    {
-      // Retrieve the original entity from the database
-      var original = await GetCompanyAsync(company.Id);
-
-      // Check if the original entity exists
-      if (original == null)
+      await _asyncLock.WaitAsync();
+      try
       {
-        throw new Exception($"Company with id '{company.Id}' not found in database");
+        var foundCompany = await _context.Companies.Where(c => c.Id == Id).SingleOrDefaultAsync() ?? throw new Exception($"Company with id '{Id}' not found in database");
+        _context.Companies.Remove(foundCompany);
+        return await _context.SaveChangesAsync();
       }
+      finally
+      {
+        _asyncLock.Release();
+      }
+    }
+ 
 
-      // Update the properties of the original entity with the new values
+  public async Task<IEnumerable<Company>> GetAllCompaniesAsync()
+  {
+    return await _context.Companies.ToListAsync();
+  }
+
+  public async Task<Company> GetCompanyAsync(Guid Id)
+  {
+    return await _context.Companies.Where(c => c.Id == Id).SingleOrDefaultAsync();
+  }
+
+  public async Task<int> SaveContextChanges()
+  {
+    await _asyncLock.WaitAsync();
+    try
+    {
+      return await _context.SaveChangesAsync();
+    }
+    finally
+    {
+      _asyncLock.Release();
+    }
+  }
+
+  public async Task<int> UpdateCompanyAsync(Company company)
+  {
+    await _asyncLock.WaitAsync();
+    try
+    {
+
+      var original = await GetCompanyAsync(company.Id) ?? throw new Exception($"Company with id '{company.Id}' not found in database");
+
       _context.Entry(original).CurrentValues.SetValues(company);
 
       try
@@ -75,5 +94,11 @@ namespace Server.Data
         throw;
       }
     }
+    finally
+    {
+      _asyncLock.Release();
+    }
   }
 }
+}
+

@@ -5,13 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using System.Runtime.ConstrainedExecution;
+using System.Threading;
 
 namespace Server.Data
 {
   public class CarRepository : ICarRepository
   {
     private readonly CarApiContext _context;
+    private readonly SemaphoreSlim _asyncLock = new SemaphoreSlim(1, 1);
     public CarRepository(CarApiContext context)
     {
       _context = context;
@@ -20,16 +21,31 @@ namespace Server.Data
 
     public async Task<int> AddCarAsync(Car car)
     {
-      _context.Cars.Add(car);
-      return await _context.SaveChangesAsync();
+      await _asyncLock.WaitAsync();
+      try
+      {
+        _context.Cars.Add(car);
+        return await _context.SaveChangesAsync();
+      }
+      finally
+      {
+        _asyncLock.Release();
+      }
     }
 
     public async Task<int> RemoveCarAsync(Guid Id)
     {
-      var cars = await GetAllCarsAsync();
-      var foundCar = cars.Where(c => c.Id == Id).FirstOrDefault() ?? throw new Exception($"Car with id '{Id}' not found in database");
-      _context.Cars.Remove(foundCar);
-      return await _context.SaveChangesAsync();
+      await _asyncLock.WaitAsync();
+      try
+      {
+        var foundCar = await _context.Cars.Where(c => c.Id == Id).SingleOrDefaultAsync() ?? throw new Exception($"Car with id '{Id}' not found in database");
+        _context.Cars.Remove(foundCar);
+        return await _context.SaveChangesAsync();
+      }
+      finally
+      {
+        _asyncLock.Release();
+      }
     }
 
     public async Task<IEnumerable<Car>> GetAllCarsAsync()
@@ -39,39 +55,46 @@ namespace Server.Data
 
     public async Task<Car> GetCarAsync(Guid Id)
     {
-      var cars = await GetAllCarsAsync();
-      return cars.Where(c => c.Id == Id).SingleOrDefault();
+      return await _context.Cars.Where(c => c.Id == Id).SingleOrDefaultAsync();
     }
 
     public async Task<int> SaveContextChanges()
     {
-      return await _context.SaveChangesAsync();
+      await _asyncLock.WaitAsync();
+      try
+      {
+        return await _context.SaveChangesAsync();
+      }
+      finally
+      {
+        _asyncLock.Release();
+      }
     }
+
 
     public async Task<int> UpdateCarAsync(Car car)
     {
-      // Retrieve the original entity from the database
-      var original = await GetCarAsync(car.Id);
-
-      // Check if the original entity exists
-      if (original == null)
-      {
-        throw new Exception($"Car with id '{car.Id}' not found in database");
-      }
-
-      // Update the properties of the original entity with the new values
-      _context.Entry(original).CurrentValues.SetValues(car);
-
+      await _asyncLock.WaitAsync();
       try
       {
-        // Save the changes to the database
-        return await _context.SaveChangesAsync();
+        var original = await GetCarAsync(car.Id) ?? throw new Exception($"Car with id '{car.Id}' not found in database");
+        _context.Entry(original).CurrentValues.SetValues(car);
+
+        try
+        {
+          // Save the changes to the database
+          return await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+          // Handle concurrency conflicts
+          // You may want to retry the operation or implement custom logic here
+          throw;
+        }
       }
-      catch (DbUpdateConcurrencyException)
+      finally
       {
-        // Handle concurrency conflicts
-        // You may want to retry the operation or implement custom logic here
-        throw;
+        _asyncLock.Release();
       }
     }
   }

@@ -11,7 +11,9 @@ namespace CarClient.Controllers
 {
 	using NServiceBus;
 
-	public class CompanyController : Controller
+  [Route("/company")]
+  [Route("/companycontroller")]
+  public class CompanyController : Controller
 	{
 		readonly SignInManager<ApplicationUser> _signInManager;
 		readonly IEndpointInstance _endpointInstance;

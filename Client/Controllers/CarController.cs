@@ -13,7 +13,8 @@ using Shared.Models;
 namespace Client.Controllers
 {
 
-	public class CarController : Controller
+  [Route("/car")]
+  public class CarController : Controller
 	{
 		readonly SignInManager<ApplicationUser> _signInManager;
 		readonly IEndpointInstance _endpointInstance;
@@ -24,14 +25,14 @@ namespace Client.Controllers
 			_endpointInstance = endpointInstance;
 		}
 
-		[HttpGet]
-		public async Task<IActionResult> GetAllCars()
+    [HttpGet("/car/getallcars")]
+    public async Task<IActionResult> GetAllCars()
 		{
 			var getCarsResponse = await Utils.Utils.GetCarsResponseAsync(_endpointInstance);
 			return Json(getCarsResponse.Cars);
 		}
 
-		[HttpPost]
+		[HttpPost("/car/updateonline")]
 		public async Task<IActionResult> UpdateOnline([FromBody] Car car)
 		{
 			if (!ModelState.IsValid) return Json(new { success = false });
@@ -42,8 +43,8 @@ namespace Client.Controllers
 			return Json(new { success = true });
 		}
 
-		// GET: Car
-		public async Task<IActionResult> Index(string id)
+    [HttpGet("/car/id")]
+    public async Task<IActionResult> Index(string id)
 		{
 			if (!_signInManager.IsSignedIn(User)) return RedirectToAction("Index", "Home");
 			var getCarsResponse = await Utils.Utils.GetCarsResponseAsync(_endpointInstance);
@@ -88,8 +89,9 @@ namespace Client.Controllers
 			return View(carListViewModel);
 		}
 
-		// GET: Car/Details/5
-		public async Task<IActionResult> Details(Guid id)
+
+    [HttpGet("/car/details")]
+    public async Task<IActionResult> Details(Guid id)
 		{
 			var getCarResponse = await Utils.Utils.GetCarResponseAsync(id, _endpointInstance);
 			var getCompanyResponse = await Utils.Utils.GetCompanyResponseAsync(getCarResponse.Car.CompanyId, _endpointInstance);
@@ -97,8 +99,8 @@ namespace Client.Controllers
 			return View(getCarResponse.Car);
 		}
 
-		// GET: Car/Create
-		public async Task<IActionResult> Create(string id)
+    [HttpGet("/car/create")]
+    public async Task<IActionResult> Create(string id)
 		{
 			var companyId = new Guid(id);
 			var car = new Car(companyId);
@@ -107,11 +109,11 @@ namespace Client.Controllers
 			return View(car);
 		}
 
-		// POST: Car/Create
-		// To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-		// more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-		[HttpPost]
-		[ValidateAntiForgeryToken]
+    // POST: Car/Create
+    // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+    // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+    [HttpPost("/car/create")]
+    [ValidateAntiForgeryToken]
 		public async Task<IActionResult> Create(
 			[Bind("CompanyId,VIN,RegNr,Online")] Car car)
 		{
@@ -122,8 +124,8 @@ namespace Client.Controllers
 			return RedirectToAction("Index", new { id = car.CompanyId });
 		}
 
-		// GET: Car/Edit/5
-		public async Task<IActionResult> Edit(Guid id)
+    [HttpGet("/car/edit")]
+    public async Task<IActionResult> Edit(Guid id)
 		{
 			var getCarResponse = await Utils.Utils.GetCarResponseAsync(id, _endpointInstance);
 			getCarResponse.Car.Disabled = true; //Prevent updates of Online/Offline while editing
@@ -133,11 +135,11 @@ namespace Client.Controllers
 			return View(getCarResponse.Car);
 		}
 
-		// POST: Car/Edit/5
-		// To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-		// more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-		[HttpPost]
-		[ValidateAntiForgeryToken]
+    // POST: Car/Edit/5
+    // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+    // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+    [HttpPost("/car/edit")]
+    [ValidateAntiForgeryToken]
 		public async Task<IActionResult> Edit(Guid id, [Bind("Id, Online")] Car car)
 		{
 			if (!ModelState.IsValid) return View(car);
@@ -150,15 +152,15 @@ namespace Client.Controllers
 			return RedirectToAction("Index", new { id = oldCar.CompanyId });
 		}
 
-		// GET: Car/Delete/5
-		public async Task<IActionResult> Delete(Guid id)
+    [HttpGet("/car/delete")]
+    public async Task<IActionResult> Delete(Guid id)
 		{
 			var getCarResponse = await Utils.Utils.GetCarResponseAsync(id, _endpointInstance);
 			return View(getCarResponse.Car);
 		}
 
 		// POST: Car/Delete/5
-		[HttpPost]
+		[HttpPost("/car/delete")]
 		[ActionName("Delete")]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> DeleteConfirmed(Guid id)
@@ -168,16 +170,22 @@ namespace Client.Controllers
 			return RedirectToAction("Index", new { id = getCarResponse.Car.CompanyId });
 		}
 
-		public async Task<bool> RegNrAvailableAsync(string regNr)
+    [HttpGet("/car/regnravailableasync")]
+    public async Task<JsonResult> RegNrAvailableAsync(string regNr)
 		{
 			var getCarsResponse = await Utils.Utils.GetCarsResponseAsync(_endpointInstance);
-			return getCarsResponse.Cars.All(c => c.RegNr != regNr);
-		}
+			bool isAvailable = getCarsResponse.Cars.All(c => c.RegNr != regNr);
 
-		public async Task<bool> VinAvailableAsync(string vin)
-		{
-			var getCarsResponse = await Utils.Utils.GetCarsResponseAsync(_endpointInstance);
-			return getCarsResponse.Cars.All(c => c.VIN != vin);
-		}
-	}
+      return Json(isAvailable);
+    }
+
+    [HttpGet("/car/vinavailableasync")]
+    public async Task<JsonResult> VinAvailableAsync(string vin)
+    {
+      var getCarsResponse = await Utils.Utils.GetCarsResponseAsync(_endpointInstance);
+      bool isAvailable = getCarsResponse.Cars.All(c => c.VIN != vin);
+
+      return Json(isAvailable);
+    }
+  }
 }

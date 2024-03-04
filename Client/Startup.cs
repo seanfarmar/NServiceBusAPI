@@ -104,7 +104,7 @@ namespace Client
 
       app.UseAuthentication(); 
 
-      app.UseAuthorization();  
+      app.UseAuthorization();
 
       app.UseEndpoints(endpoints =>
       {
@@ -113,5 +113,5 @@ namespace Client
             pattern: "{controller=Home}/{action=Index}/{id?}");
       });
     }
-	}
+  }
 }

@@ -28,13 +28,13 @@ namespace Server.Requesthandler
 		{
 			log.Info("Received CreateCarRequest.");
 
-			var response = new CreateCarResponse()
+      await _carRepository.AddCarAsync(message.Car);
+
+      var response = new CreateCarResponse()
 			{
         DataId = message.DataId,
         Car = message.Car
 			};
-
-			await _carRepository.AddCarAsync(message.Car);
 
 		  await context.Reply(response);
 		}
