@@ -43,7 +43,7 @@ namespace Client.Controllers
 			return Json(new { success = true });
 		}
 
-    [HttpGet("/car/id")]
+    [HttpGet("/car/index")]
     public async Task<IActionResult> Index(string id)
 		{
 			if (!_signInManager.IsSignedIn(User)) return RedirectToAction("Index", "Home");
