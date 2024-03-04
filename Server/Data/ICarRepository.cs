@@ -1,9 +1,23 @@
 ﻿using Shared.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Server.Data
 {
-	public interface ICarRepository:IRepository<Car>
+	public interface ICarRepository
     {
-	    //Todo, if more advanced filtering is needed;
-	}
+    public Task<int> AddCarAsync(Car car);
+
+    public Task<int> UpdateCarAsync(Car car);
+    
+    public Task<Car?> GetCarAsync(Guid Id);
+    
+    public Task<IEnumerable<Car>> GetAllCarsAsync();
+
+    public Task<int> RemoveCarAsync(Guid Id);
+
+    public Task<int> SaveContextChanges();
+  }
 }

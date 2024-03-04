@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Client.DAL
 {
 	using Client.Models;
+  using System.IO;
+  using System;
 
 	public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
@@ -16,8 +18,8 @@ namespace Client.DAL
     {
       if (!optionsBuilder.IsConfigured)
       {
-        // Configure the context if it hasn't been configured explicitly
-        optionsBuilder.UseSqlite("DataSource=App_Data/AspNet.db");
+        var dbFilePath = Path.Combine(Path.Combine(AppContext.BaseDirectory, "App_Data"), "AspNet.db");
+        optionsBuilder.UseSqlite($"Data Source={dbFilePath}");
       }
     }//}
   }

@@ -1,6 +1,8 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Shared.Models;
 
 namespace Server.DAL
@@ -74,8 +76,10 @@ namespace Server.DAL
     static public void InitSqLiteDb()
     {
       DbContextOptionsBuilder<CarApiContext> _optionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
-      _optionsBuilder.UseSqlite("DataSource=App_Data/Car.db");
-      using (var context = new CarApiContext(_optionsBuilder.Options))
+      var dbFilePath = Path.Combine(Path.Combine(AppContext.BaseDirectory, "App_Data"), "Car.db");
+      _optionsBuilder.UseSqlite($"Data Source={dbFilePath}");
+      
+			using (var context = new CarApiContext(_optionsBuilder.Options))
       {
         context.Database.EnsureCreated();
         context.EnsureSeedData();

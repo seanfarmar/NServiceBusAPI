@@ -4,39 +4,40 @@ using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.Logging;
 using Shared.Responses;
-using Server.DAL;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
 using Server.Data;
-using Shared.Models;
+using Microsoft.EntityFrameworkCore;
+using Server.DAL;
 
 namespace Server.Requesthandler
 {
 	public class GetCarsRequestHandler : IHandleMessages<GetCarsRequest>
 	{
-		readonly DbContextOptionsBuilder<CarApiContext> _dbContextOptionsBuilder;
-		public GetCarsRequestHandler()
-		{
-			_dbContextOptionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
-		}
+    readonly DbContextOptionsBuilder<CarApiContext> _dbContextOptionsBuilder;
+    readonly CarApiContext _carApiContext;
+    readonly ICarRepository _carRepository;
 
-		static ILog log = LogManager.GetLogger<GetCarsRequestHandler>();
+    public GetCarsRequestHandler()
+    {
+      _dbContextOptionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
+      _carApiContext = new CarApiContext(_dbContextOptionsBuilder.Options);
+      _carRepository = new CarRepository(_carApiContext);
+    }
 
-		public Task Handle(GetCarsRequest message, IMessageHandlerContext context)
+    static ILog log = LogManager.GetLogger<GetCarsRequestHandler>();
+
+		public async Task Handle(GetCarsRequest message, IMessageHandlerContext context)
 		{
 			log.Info("Received GetCarsRequest.");
-			List<Car> cars;
-			using (var unitOfWork = new CarUnitOfWork(new CarApiContext(_dbContextOptionsBuilder.Options)))
-			{
-				cars = unitOfWork.Cars.GetAll().ToList();
-			}
-			var response = new GetCarsResponse()
-			{
-				Cars = cars
-			};
 
-			var reply = context.Reply(response);
-			return reply;
-		}
+      var cars = await _carRepository.GetAllCarsAsync();
+
+      var response = new GetCarsResponse()
+      {
+        DataId = message.DataId,
+        Cars = cars.ToList()
+      };
+
+      await context.Reply(response);
+    }
 	}
 }

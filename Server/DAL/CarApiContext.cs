@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Shared.Models;
+using System.IO;
+using System;
 
 namespace Server.DAL
 {
@@ -13,8 +15,8 @@ namespace Server.DAL
     {
       if (!optionsBuilder.IsConfigured)
       {
-        // Configure the context if it hasn't been configured explicitly
-        optionsBuilder.UseSqlite("DataSource=App_Data/Car.db");
+        var dbFilePath = Path.Combine(Path.Combine(AppContext.BaseDirectory, "App_Data"), "Car.db");
+        optionsBuilder.UseSqlite($"Data Source={dbFilePath}");
       }
     }
     public DbSet<Car> Cars { get; set; }

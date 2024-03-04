@@ -2,46 +2,40 @@ using NServiceBus;
 using System.Threading.Tasks;
 using NServiceBus.Logging;
 using Shared.Requests;
-using System;
 using Shared.Responses;
-using Server.DAL;
-using Microsoft.EntityFrameworkCore;
 using Server.Data;
-using Shared.Models;
-using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using Server.DAL;
 
 namespace Server.Requesthandler
 {
 	public class GetCompanyRequestHandler : IHandleMessages<GetCompanyRequest>
 	{
-		readonly DbContextOptionsBuilder<CarApiContext> _dbContextOptionsBuilder;
-		public GetCompanyRequestHandler()
-		{
-			_dbContextOptionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
-		}
+    readonly DbContextOptionsBuilder<CarApiContext> _dbContextOptionsBuilder;
+    readonly CarApiContext _carApiContext;
+    readonly ICompanyRepository _companyRepository;
+    public GetCompanyRequestHandler()
+    {
+      _dbContextOptionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
+      _carApiContext = new CarApiContext(_dbContextOptionsBuilder.Options);
+      _companyRepository = new CompanyRepository(_carApiContext);
+    }
 
-		static ILog log = LogManager.GetLogger<GetCompanyRequest>();
+    static ILog log = LogManager.GetLogger<GetCompanyRequest>();
 
-		public Task Handle(GetCompanyRequest message, IMessageHandlerContext context)
+		public async Task Handle(GetCompanyRequest message, IMessageHandlerContext context)
 		{
 			log.Info("Received GetCompanyRequest");
 
-			Company company;
-			using (var unitOfWork = new CarUnitOfWork(new CarApiContext(_dbContextOptionsBuilder.Options)))
+      var company = await _companyRepository.GetCompanyAsync(message.CompanyId);
+
+      var response = new GetCompanyResponse()
       {
-        var list = unitOfWork.Companies.GetAll();
-        company = list.Where(c => c.Id == message.CompanyId).SingleOrDefault();
-      }
+        DataId = message.DataId,
+        Company = company
+      };
 
-      var response = new GetCompanyResponse(message.CompanyId)
-			{
-				DataId = Guid.NewGuid(),
-				Company = company
-			};
-
-			var reply = context.Reply(response);
-			return reply;
-
-		}
+      await context.Reply(response);
+    }
 	}
 }

@@ -8,7 +8,7 @@ namespace Shared.Responses
 	[Serializable]
 	public class GetCompanyResponse : IMessage
 	{
-		public GetCompanyResponse(Guid companyId)
+		public GetCompanyResponse()
 		{
 			DataId = Guid.NewGuid();
 		}

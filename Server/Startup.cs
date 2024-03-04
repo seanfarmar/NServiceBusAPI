@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using NServiceBus;
 using NServiceBus.Transport.SqlServer;
 using Server.DAL;
+using Server.Data;
 using Server.Requesthandler;
 using Shared;
 using System;
@@ -29,13 +30,12 @@ namespace Server
     public void ConfigureServices(IServiceCollection services)
     {
       var dbFilePath = Path.Combine(Path.Combine(AppContext.BaseDirectory, "App_Data"), "Car.db");
-
-      var dbContextOptionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
-      dbContextOptionsBuilder.UseSqlite($"Data Source={dbFilePath}");
-
       services.AddDbContext<CarApiContext>(options =>
           options.UseSqlite($"Data Source={dbFilePath}"));
 
+      services.AddTransient<CarApiContext>();
+      services.AddTransient<ICarRepository, CarRepository>();
+      services.AddTransient<ICompanyRepository, CompanyRepository>();
       services.AddTransient<CreateCarRequestHandler>();
       services.AddTransient<CreateCompanyRequestHandler>();
       services.AddTransient<DeleteCarRequestHandler>();

@@ -2,53 +2,41 @@ using NServiceBus;
 using System.Threading.Tasks;
 using NServiceBus.Logging;
 using Shared.Requests;
-using System;
 using Shared.Responses;
-using Server.DAL;
-using Microsoft.EntityFrameworkCore;
 using Server.Data;
+using Microsoft.EntityFrameworkCore;
+using Server.DAL;
 
 namespace Server.Requesthandler
 {
 	public class UpdateCompanyRequestHandler : IHandleMessages<UpdateCompanyRequest>
 	{
-		readonly DbContextOptionsBuilder<CarApiContext> _dbContextOptionsBuilder;
-		public UpdateCompanyRequestHandler()
-		{
-			_dbContextOptionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
-		}
-		static ILog log = LogManager.GetLogger<UpdateCompanyRequest>();
+    readonly DbContextOptionsBuilder<CarApiContext> _dbContextOptionsBuilder;
+    readonly CarApiContext _carApiContext;
+    readonly ICompanyRepository _companyRepository;
+    public UpdateCompanyRequestHandler()
+    {
+      _dbContextOptionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
+      _carApiContext = new CarApiContext(_dbContextOptionsBuilder.Options);
+      _companyRepository = new CompanyRepository(_carApiContext);
+    }
 
-		public Task Handle(UpdateCompanyRequest message, IMessageHandlerContext context)
+    static ILog log = LogManager.GetLogger<UpdateCompanyRequest>();
+
+		public async Task Handle(UpdateCompanyRequest message, IMessageHandlerContext context)
 		{
 			log.Info("Received UpdateCompanyRequest");
-			using (var unitOfWork = new CarUnitOfWork(new CarApiContext(_dbContextOptionsBuilder.Options)))
-			{
-				var existingCompany = unitOfWork.Companies.Get(message.Company.Id);
-				if (existingCompany != null)
-				{
-					if (!Equals(existingCompany, message.Company))
-					{
-						existingCompany = message.Company;
-            unitOfWork.Companies.Update(message.Company);
-						unitOfWork.Complete();
-					}
-				}
-				else
-				{
-					throw new Exception("Cannot update company, not fund in database");
-				}
-			}
 
-        var response = new UpdateCompanyResponse()
-			{
-				DataId = Guid.NewGuid(),
-				Company = message.Company
-			};
+      await _companyRepository.UpdateCompanyAsync(message.Company);
 
-			var reply = context.Reply(response);
-			return reply;
+      var response = new UpdateCompanyResponse()
+      {
+        DataId = message.DataId,
+        Company = message.Company
+      };
 
-		}
+      await context.Reply(response);
+
+    }
 	}
 }

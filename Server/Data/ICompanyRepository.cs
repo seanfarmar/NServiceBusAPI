@@ -1,10 +1,22 @@
 ﻿using Shared.Models;
-
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Server.Data
 {
-    public interface ICompanyRepository:IRepository<Company>
-    {
-	   //Todo, if more advanced filtering is needed;
-	}
+  public interface ICompanyRepository
+  {
+    public Task<int> AddCompanyAsync(Company car);
+
+    public Task<int> UpdateCompanyAsync(Company car);
+
+    public Task<Company?> GetCompanyAsync(Guid Id);
+
+    public Task<IEnumerable<Company>> GetAllCompaniesAsync();
+
+    public Task<int> RemoveCompanyAsync(Guid Id);
+
+    public Task<int> SaveContextChanges();
+  }
 }
