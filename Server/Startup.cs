@@ -76,19 +76,9 @@ namespace Server
       var routing = endpointConfiguration.UseTransport(transport);
       SqlHelper.CreateSchema(connectionString, "server").GetAwaiter().GetResult();
       endpointConfiguration.MakeInstanceUniquelyAddressable("1");
-      //routing.RouteToEndpoint(typeof(Response), "NServiceBusCore.Client");
 
-
-
-      //var allText = File.ReadAllText("Startup.sql");
-      //await SqlHelper.ExecuteSql(connectionString, allText);
       EndpointInstance = Endpoint.Start(endpointConfiguration).ConfigureAwait(false).GetAwaiter().GetResult();
       services.AddSingleton(EndpointInstance);
-      //Console.WriteLine("Server, Press any key to exit");
-      //Console.ReadKey();
-      //await EndpointInstance.Stop();
-      //var serviceProvider = services.BuildServiceProvider();
-      //var someService = serviceProvider.GetService<DbContextOptionsBuilder<CarApiContext>>();
     }
 
     public void Configure(IApplicationLifetime appLifetime)

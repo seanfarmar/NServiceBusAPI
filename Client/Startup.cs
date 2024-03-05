@@ -56,7 +56,7 @@ namespace Client
       var routing = endpointConfiguration.UseTransport(transport);
 
       endpointConfiguration.MakeInstanceUniquelyAddressable("1");
-      //routing.RouteToEndpoint(typeof(Request), "NServiceBusCore.Server");
+
       endpointConfiguration.EnableCallbacks();
       EndpointInstance = Endpoint.Start(endpointConfiguration).ConfigureAwait(false).GetAwaiter().GetResult();
 
