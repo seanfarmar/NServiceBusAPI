@@ -1,30 +1,30 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.Text.Encodings.Web;
-using System.Threading.Tasks;
+﻿using Client.Models;
+using Client.Models.ManageViewModels;
+using Client.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Client.Services;
-using Client.Models;
-using Client.Models.ManageViewModels;
+using System;
+using System.Linq;
+using System.Text;
+using System.Text.Encodings.Web;
+using System.Threading.Tasks;
 
 namespace CarClient.Controllers
 {
 
-	[Authorize]
+    [Authorize]
     [Route("[controller]/[action]")]
     public class ManageController : Controller
     {
-	    const string AuthenicatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
-	    readonly IEmailSender _emailSender;
-	    readonly ILogger _logger;
-	    readonly SignInManager<ApplicationUser> _signInManager;
-	    readonly UrlEncoder _urlEncoder;
-	    readonly UserManager<ApplicationUser> _userManager;
+        const string AuthenicatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
+        readonly IEmailSender _emailSender;
+        readonly ILogger _logger;
+        readonly SignInManager<ApplicationUser> _signInManager;
+        readonly UrlEncoder _urlEncoder;
+        readonly UserManager<ApplicationUser> _userManager;
 
         public ManageController(
             UserManager<ApplicationUser> userManager,
@@ -126,7 +126,7 @@ namespace CarClient.Controllers
             if (!hasPassword)
                 return RedirectToAction(nameof(SetPassword));
 
-            var model = new ChangePasswordViewModel {StatusMessage = StatusMessage};
+            var model = new ChangePasswordViewModel { StatusMessage = StatusMessage };
             return View(model);
         }
 
@@ -168,7 +168,7 @@ namespace CarClient.Controllers
             if (hasPassword)
                 return RedirectToAction(nameof(ChangePassword));
 
-            var model = new SetPasswordViewModel {StatusMessage = StatusMessage};
+            var model = new SetPasswordViewModel { StatusMessage = StatusMessage };
             return View(model);
         }
 
@@ -203,7 +203,7 @@ namespace CarClient.Controllers
             if (user == null)
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
 
-            var model = new ExternalLoginsViewModel {CurrentLogins = await _userManager.GetLoginsAsync(user)};
+            var model = new ExternalLoginsViewModel { CurrentLogins = await _userManager.GetLoginsAsync(user) };
             model.OtherLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync())
                 .Where(auth => model.CurrentLogins.All(ul => auth.Name != ul.LoginProvider))
                 .ToList();
@@ -400,7 +400,7 @@ namespace CarClient.Controllers
                     $"Cannot generate recovery codes for user with ID '{user.Id}' as they do not have 2FA enabled.");
 
             var recoveryCodes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
-            var model = new GenerateRecoveryCodesViewModel {RecoveryCodes = recoveryCodes.ToArray()};
+            var model = new GenerateRecoveryCodesViewModel { RecoveryCodes = recoveryCodes.ToArray() };
 
             _logger.LogInformation("User with ID {UserId} has generated new 2FA recovery codes.", user.Id);
 

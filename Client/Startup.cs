@@ -13,105 +13,103 @@ using NServiceBus;
 using NServiceBus.Transport.SqlServer;
 using System;
 using System.IO;
-using System.Threading.Tasks;
 
 namespace Client
 {
-  public class Startup
-	{
-    public Startup(IConfiguration configuration)
+    public class Startup
     {
-      Configuration = configuration;
-    }
-		public IConfiguration Configuration { get; }
-    IEndpointInstance EndpointInstance { get; set; }
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+        public IConfiguration Configuration { get; }
+        IEndpointInstance EndpointInstance { get; set; }
 
-		// This method gets called by the runtime. Use this method to add services to the container.
-		public void ConfigureServices(IServiceCollection services)
-		{
-      ConfigureServicesAsync(services);
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices(IServiceCollection services)
+        {
+            ConfigureServicesAsync(services);
 
-      var endpointConfiguration = new EndpointConfiguration("NServiceBusCore.Client");
-      endpointConfiguration.SendFailedMessagesTo("error");
-      endpointConfiguration.EnableInstallers();
+            var endpointConfiguration = new EndpointConfiguration("NServiceBusCore.Client");
+            endpointConfiguration.SendFailedMessagesTo("error");
+            endpointConfiguration.EnableInstallers();
 
-      var connectionString = Configuration.GetConnectionString("NServiceBusTransport");
-      var transport = new SqlServerTransport(connectionString)
-      {
-        DefaultSchema = "dbo",
-        Subscriptions =
+            var connectionString = Configuration.GetConnectionString("NServiceBusTransport");
+            var transport = new SqlServerTransport(connectionString)
+            {
+                DefaultSchema = "dbo",
+                Subscriptions =
             {
                 SubscriptionTableName = new SubscriptionTableName(
                         table: "Subscriptions",
                         schema: "dbo")
             },
-        TransportTransactionMode = TransportTransactionMode.SendsAtomicWithReceive
-      };
+                TransportTransactionMode = TransportTransactionMode.SendsAtomicWithReceive
+            };
 
-      transport.SchemaAndCatalog.UseSchemaForQueue("error", "dbo");
-      transport.SchemaAndCatalog.UseSchemaForQueue("audit", "dbo");
-      transport.SchemaAndCatalog.UseSchemaForQueue("NServiceBusCore.Client", "dbo");
+            transport.SchemaAndCatalog.UseSchemaForQueue("error", "dbo");
+            transport.SchemaAndCatalog.UseSchemaForQueue("audit", "dbo");
+            transport.SchemaAndCatalog.UseSchemaForQueue("NServiceBusCore.Client", "dbo");
 
-      endpointConfiguration.UseSerialization<SystemJsonSerializer>();
-      var routing = endpointConfiguration.UseTransport(transport);
+            endpointConfiguration.UseSerialization<SystemJsonSerializer>();
+            var routing = endpointConfiguration.UseTransport(transport);
 
-      endpointConfiguration.MakeInstanceUniquelyAddressable("1");
+            endpointConfiguration.MakeInstanceUniquelyAddressable("1");
 
-      endpointConfiguration.EnableCallbacks();
-      EndpointInstance = Endpoint.Start(endpointConfiguration).ConfigureAwait(false).GetAwaiter().GetResult();
+            endpointConfiguration.EnableCallbacks();
+            EndpointInstance = Endpoint.Start(endpointConfiguration).ConfigureAwait(false).GetAwaiter().GetResult();
 
-      services.AddSingleton(EndpointInstance);
-		}
+            services.AddSingleton(EndpointInstance);
+        }
 
-		void ConfigureServicesAsync(IServiceCollection services)
-		{
-      var dbFilePath = Path.Combine(Path.Combine(AppContext.BaseDirectory, "App_Data"), "AspNet.db");
-      services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseSqlite($"Data Source={dbFilePath}"));
+        void ConfigureServicesAsync(IServiceCollection services)
+        {
+            var dbFilePath = Path.Combine(Path.Combine(AppContext.BaseDirectory, "App_Data"), "AspNet.db");
+            services.AddDbContext<ApplicationDbContext>(options =>
+              options.UseSqlite($"Data Source={dbFilePath}"));
 
-      services.AddTransient<ApplicationDbContext>();
-      services.AddTransient<IdentityDbContext<ApplicationUser>>();
+            services.AddTransient<ApplicationDbContext>();
+            services.AddTransient<IdentityDbContext<ApplicationUser>>();
 
-      services.AddIdentity<ApplicationUser, IdentityRole>()
-        .AddEntityFrameworkStores<ApplicationDbContext>()
-        .AddDefaultTokenProviders();
+            services.AddIdentity<ApplicationUser, IdentityRole>()
+              .AddEntityFrameworkStores<ApplicationDbContext>()
+              .AddDefaultTokenProviders();
+
+            services.AddTransient<IEmailSender, EmailSender>();
+
+            services.AddMvc();
+
+            services.AddAuthentication();
+
+            services.AddAuthorization();
+        }
 
 
-      services.AddTransient<IEmailSender, EmailSender>();
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+            }
 
-      services.AddMvc();
+            app.UseStaticFiles();
 
-      services.AddAuthentication();
+            app.UseRouting();
 
-      services.AddAuthorization();
+            app.UseAuthentication();
+
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute(
+              name: "default",
+              pattern: "{controller=Home}/{action=Index}/{id?}");
+            });
+        }
     }
-
-
-		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-		{
-      if (env.IsDevelopment())
-      {
-        app.UseDeveloperExceptionPage();
-      }
-      else
-      {
-        app.UseExceptionHandler("/Home/Error");
-      }
-
-      app.UseStaticFiles();
-     
-      app.UseRouting();
-
-      app.UseAuthentication(); 
-
-      app.UseAuthorization();
-
-      app.UseEndpoints(endpoints =>
-      {
-        endpoints.MapControllerRoute(
-            name: "default",
-            pattern: "{controller=Home}/{action=Index}/{id?}");
-      });
-    }
-  }
 }
