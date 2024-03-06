@@ -1,42 +1,41 @@
+using Microsoft.Extensions.Logging;
 using NServiceBus;
-using System.Threading.Tasks;
-using NServiceBus.Logging;
+using Server.Data;
 using Shared.Requests;
 using Shared.Responses;
-using Server.Data;
-using Microsoft.EntityFrameworkCore;
-using Server.DAL;
+using System.Threading.Tasks;
 
 namespace Server.Requesthandler
 {
-	public class UpdateCompanyRequestHandler : IHandleMessages<UpdateCompanyRequest>
-	{
-    readonly DbContextOptionsBuilder<CarApiContext> _dbContextOptionsBuilder;
-    readonly CarApiContext _carApiContext;
-    readonly ICompanyRepository _companyRepository;
-    public UpdateCompanyRequestHandler()
+    public class UpdateCompanyRequestHandler : IHandleMessages<UpdateCompanyRequest>
     {
-      _dbContextOptionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
-      _carApiContext = new CarApiContext(_dbContextOptionsBuilder.Options);
-      _companyRepository = new CompanyRepository(_carApiContext);
+        readonly ILogger<UpdateCompanyRequestHandler> _logger;
+        readonly ICompanyRepository _companyRepository;
+
+        public UpdateCompanyRequestHandler(
+            ILogger<UpdateCompanyRequestHandler> logger,
+            ICompanyRepository companyRepository)
+        {
+            _logger = logger;
+            _companyRepository = companyRepository;
+        }
+
+        public async Task Handle(UpdateCompanyRequest message, IMessageHandlerContext context)
+        {
+            _logger.LogInformation("Received UpdateCompanyRequest");
+
+            await _companyRepository.UpdateCompanyAsync(message.Company)
+                .ConfigureAwait(false);
+
+            var response = new UpdateCompanyResponse()
+            {
+                DataId = message.DataId,
+                Company = message.Company
+            };
+
+            await context.Reply(response)
+                .ConfigureAwait(false);
+
+        }
     }
-
-    static ILog log = LogManager.GetLogger<UpdateCompanyRequest>();
-
-		public async Task Handle(UpdateCompanyRequest message, IMessageHandlerContext context)
-		{
-			log.Info("Received UpdateCompanyRequest");
-
-      await _companyRepository.UpdateCompanyAsync(message.Company);
-
-      var response = new UpdateCompanyResponse()
-      {
-        DataId = message.DataId,
-        Company = message.Company
-      };
-
-      await context.Reply(response);
-
-    }
-	}
 }

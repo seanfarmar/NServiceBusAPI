@@ -1,41 +1,41 @@
+using Microsoft.Extensions.Logging;
 using NServiceBus;
-using System.Threading.Tasks;
-using NServiceBus.Logging;
+using Server.Data;
 using Shared.Requests;
 using Shared.Responses;
-using Server.Data;
-using Microsoft.EntityFrameworkCore;
-using Server.DAL;
+using System.Threading.Tasks;
 
 namespace Server.Requesthandler
 {
-	public class GetCompanyRequestHandler : IHandleMessages<GetCompanyRequest>
-	{
-    readonly DbContextOptionsBuilder<CarApiContext> _dbContextOptionsBuilder;
-    readonly CarApiContext _carApiContext;
-    readonly ICompanyRepository _companyRepository;
-    public GetCompanyRequestHandler()
+    public class GetCompanyRequestHandler : IHandleMessages<GetCompanyRequest>
     {
-      _dbContextOptionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
-      _carApiContext = new CarApiContext(_dbContextOptionsBuilder.Options);
-      _companyRepository = new CompanyRepository(_carApiContext);
+        readonly ILogger<GetCompanyRequestHandler> _logger;
+        readonly ICompanyRepository _companyRepository;
+
+        public GetCompanyRequestHandler(
+            ILogger<GetCompanyRequestHandler> logger,
+            ICompanyRepository companyRepository)
+        {
+            _logger = logger;
+            _companyRepository = companyRepository;
+        }
+
+        // TODO: this is not really a good use of messaging, use a call from the API controller to get data from the database
+        public async Task Handle(GetCompanyRequest message, IMessageHandlerContext context)
+        {
+            _logger.LogInformation("Received GetCompanyRequest");
+
+            var company = await _companyRepository.GetCompanyAsync(message.CompanyId)
+                .ConfigureAwait(false);
+
+            var response = new GetCompanyResponse()
+            {
+                DataId = message.DataId,
+                Company = company
+            };
+
+            await context.Reply(response)
+                .ConfigureAwait(false);
+        }
     }
-
-    static ILog log = LogManager.GetLogger<GetCompanyRequest>();
-
-		public async Task Handle(GetCompanyRequest message, IMessageHandlerContext context)
-		{
-			log.Info("Received GetCompanyRequest");
-
-      var company = await _companyRepository.GetCompanyAsync(message.CompanyId);
-
-      var response = new GetCompanyResponse()
-      {
-        DataId = message.DataId,
-        Company = company
-      };
-
-      await context.Reply(response);
-    }
-	}
 }

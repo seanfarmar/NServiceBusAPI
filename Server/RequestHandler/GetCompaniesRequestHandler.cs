@@ -1,42 +1,42 @@
+using Microsoft.Extensions.Logging;
 using NServiceBus;
-using System.Threading.Tasks;
-using NServiceBus.Logging;
+using Server.Data;
 using Shared.Requests;
 using Shared.Responses;
 using System.Linq;
-using Server.Data;
-using Microsoft.EntityFrameworkCore;
-using Server.DAL;
+using System.Threading.Tasks;
 
 namespace Server.Requesthandler
 {
-	public class GetCompaniesRequestHandler : IHandleMessages<GetCompaniesRequest>
-	{
-    readonly DbContextOptionsBuilder<CarApiContext> _dbContextOptionsBuilder;
-    readonly CarApiContext _carApiContext;
-    readonly ICompanyRepository _companyRepository;
-    public GetCompaniesRequestHandler()
+    public class GetCompaniesRequestHandler : IHandleMessages<GetCompaniesRequest>
     {
-      _dbContextOptionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
-      _carApiContext = new CarApiContext(_dbContextOptionsBuilder.Options);
-      _companyRepository = new CompanyRepository(_carApiContext);
+        readonly ILogger<GetCompaniesRequestHandler> _logger;
+        readonly ICompanyRepository _companyRepository;
+
+        public GetCompaniesRequestHandler(
+            ILogger<GetCompaniesRequestHandler> logger,
+            ICompanyRepository companyRepository)
+        {
+            _logger = logger;
+            _companyRepository = companyRepository;
+        }
+
+        // TODO: this is not really a good use of messaging, use a call from the API controller to get data from the database
+        public async Task Handle(GetCompaniesRequest message, IMessageHandlerContext context)
+        {
+            _logger.LogInformation("Received GetCompaniesRequest");
+
+            var companies = await _companyRepository.GetAllCompaniesAsync()
+                .ConfigureAwait(false);
+
+            var response = new GetCompaniesResponse()
+            {
+                DataId = message.DataId,
+                Companies = companies.ToList()
+            };
+
+            await context.Reply(response)
+                .ConfigureAwait(false);
+        }
     }
-
-    static ILog log = LogManager.GetLogger<GetCompaniesRequest>();
-
-		public async Task Handle(GetCompaniesRequest message, IMessageHandlerContext context)
-		{
-			log.Info("Received GetCompaniesRequest");
-
-      var companies = await _companyRepository.GetAllCompaniesAsync();
-
-      var response = new GetCompaniesResponse()
-      {
-        DataId = message.DataId,
-        Companies = companies.ToList()
-      };
-
-      await context.Reply(response);
-    }
-	}
 }

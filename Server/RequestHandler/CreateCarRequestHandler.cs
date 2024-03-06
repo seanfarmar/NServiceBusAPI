@@ -1,42 +1,41 @@
-using Shared.Requests;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using NServiceBus;
-using NServiceBus.Logging;
-using Shared.Responses;
 using Server.Data;
-using Microsoft.EntityFrameworkCore;
-using Server.DAL;
-using static Microsoft.AspNetCore.Hosting.Internal.HostingApplication;
+using Shared.Requests;
+using Shared.Responses;
+using System.Threading.Tasks;
 
 namespace Server.Requesthandler
 {
-  public class CreateCarRequestHandler : IHandleMessages<CreateCarRequest>
-  {
-    readonly DbContextOptionsBuilder<CarApiContext> _dbContextOptionsBuilder;
-    readonly CarApiContext _carApiContext;
-    readonly ICarRepository _carRepository;
-    public CreateCarRequestHandler()
+    public class CreateCarRequestHandler : IHandleMessages<CreateCarRequest>
     {
-      _dbContextOptionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
-      _carApiContext = new CarApiContext(_dbContextOptionsBuilder.Options);
-      _carRepository = new CarRepository(_carApiContext);
+        // readonly DbContextOptionsBuilder<CarApiContext> _dbContextOptionsBuilder;
+        readonly ICarRepository _carRepository;
+        readonly ILogger<CreateCarRequestHandler> _logger;
+
+        public CreateCarRequestHandler(
+            ILogger<CreateCarRequestHandler> logger,
+            ICarRepository carRepository)
+        {
+            _logger = logger;
+            _carRepository = carRepository;
+        }
+
+        public async Task Handle(CreateCarRequest message, IMessageHandlerContext context)
+        {
+            _logger.LogInformation("Received CreateCarRequest.");
+
+            await _carRepository.AddCarAsync(message.Car)
+                .ConfigureAwait(false);
+
+            var response = new CreateCarResponse()
+            {
+                DataId = message.DataId,
+                Car = message.Car
+            };
+
+            await context.Reply(response)
+                .ConfigureAwait(false);
+        }
     }
-
-    static ILog log = LogManager.GetLogger<CreateCarRequestHandler>();
-
-		public async Task Handle(CreateCarRequest message, IMessageHandlerContext context)
-		{
-			log.Info("Received CreateCarRequest.");
-
-      await _carRepository.AddCarAsync(message.Car);
-
-      var response = new CreateCarResponse()
-			{
-        DataId = message.DataId,
-        Car = message.Car
-			};
-
-		  await context.Reply(response);
-		}
-	}
 }

@@ -1,41 +1,39 @@
-using Shared.Requests;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using NServiceBus;
-using NServiceBus.Logging;
-using Shared.Responses;
 using Server.Data;
-using Microsoft.EntityFrameworkCore;
-using Server.DAL;
+using Shared.Requests;
+using Shared.Responses;
+using System.Threading.Tasks;
 
 namespace Server.Requesthandler
 {
-	public class DeleteCarRequestHandler : IHandleMessages<DeleteCarRequest>
-	{
-    readonly DbContextOptionsBuilder<CarApiContext> _dbContextOptionsBuilder;
-    readonly CarApiContext _carApiContext;
-    readonly ICarRepository _carRepository;
-
-    public DeleteCarRequestHandler()
+    public class DeleteCarRequestHandler : IHandleMessages<DeleteCarRequest>
     {
-      _dbContextOptionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
-      _carApiContext = new CarApiContext(_dbContextOptionsBuilder.Options);
-      _carRepository = new CarRepository(_carApiContext);
+        readonly ICarRepository _carRepository;
+        readonly ILogger<DeleteCarRequestHandler> _logger;
+
+        public DeleteCarRequestHandler(
+            ILogger<DeleteCarRequestHandler> logger,
+            ICarRepository carRepository)
+        {
+            _logger = logger;
+            _carRepository = carRepository;
+        }
+
+        public async Task Handle(DeleteCarRequest message, IMessageHandlerContext context)
+        {
+            _logger.LogInformation("Received DeleteCarRequest.");
+
+            await _carRepository.RemoveCarAsync(message.CarId)
+                .ConfigureAwait(false);
+
+            var response = new DeleteCarResponse()
+            {
+                DataId = message.DataId,
+            };
+
+            await context.Reply(response)
+                .ConfigureAwait(false);
+        }
     }
-
-    static ILog log = LogManager.GetLogger<DeleteCarRequestHandler>();
-
-    public async Task Handle(DeleteCarRequest message, IMessageHandlerContext context)
-    {
-      log.Info("Received DeleteCarRequest.");
-      
-      await _carRepository.RemoveCarAsync(message.CarId);
-
-      var response = new DeleteCarResponse()
-      {
-        DataId = message.DataId,
-      };
-
-      await context.Reply(response);
-    }
-  }
 }

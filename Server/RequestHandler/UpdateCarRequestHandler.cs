@@ -1,42 +1,40 @@
-using Shared.Requests;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using NServiceBus;
-using NServiceBus.Logging;
-using Shared.Responses;
 using Server.Data;
-using Microsoft.EntityFrameworkCore;
-using Server.DAL;
+using Shared.Requests;
+using Shared.Responses;
+using System.Threading.Tasks;
 
 namespace Server.Requesthandler
 {
-	public class UpdateCarRequestHandler : IHandleMessages<UpdateCarRequest>
-	{
-    readonly DbContextOptionsBuilder<CarApiContext> _dbContextOptionsBuilder;
-    readonly CarApiContext _carApiContext;
-    readonly ICarRepository _carRepository;
-
-    public UpdateCarRequestHandler()
+    public class UpdateCarRequestHandler : IHandleMessages<UpdateCarRequest>
     {
-      _dbContextOptionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
-      _carApiContext = new CarApiContext(_dbContextOptionsBuilder.Options);
-      _carRepository = new CarRepository(_carApiContext);
+        readonly ILogger<UpdateCarRequestHandler> _logger;
+        readonly ICarRepository _carRepository;
+
+        public UpdateCarRequestHandler(
+            ILogger<UpdateCarRequestHandler> logger,
+            ICarRepository carRepository)
+        {
+            _logger = logger;
+            _carRepository = carRepository;
+        }
+
+        public async Task Handle(UpdateCarRequest message, IMessageHandlerContext context)
+        {
+            _logger.LogInformation("Received UpdateCarRequest.");
+
+            await _carRepository.UpdateCarAsync(message.Car)
+                .ConfigureAwait(false);
+
+            var response = new UpdateCarResponse()
+            {
+                DataId = message.DataId,
+                Car = message.Car
+            };
+
+            await context.Reply(response)
+                .ConfigureAwait(false);
+        }
     }
-
-    static ILog log = LogManager.GetLogger<UpdateCarRequestHandler>();
-
-    public async Task Handle(UpdateCarRequest message, IMessageHandlerContext context)
-    {
-      log.Info("Received UpdateCarRequest.");
-
-      await _carRepository.UpdateCarAsync(message.Car);
-
-      var response = new UpdateCarResponse()
-      {
-        DataId = message.DataId,
-        Car = message.Car
-      };
-
-      await context.Reply(response);
-    }
-  }
 }

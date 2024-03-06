@@ -34,7 +34,13 @@ namespace Client
             endpointConfiguration.SendFailedMessagesTo("error");
             endpointConfiguration.EnableInstallers();
 
+            endpointConfiguration.Conventions()
+                .DefiningCommandsAs(t => t.Namespace != null && t.Namespace.EndsWith("Requests"))
+                .DefiningEventsAs(t => t.Namespace != null && t.Namespace.EndsWith("Events"))
+                .DefiningMessagesAs(t => t.Namespace != null && t.Namespace.EndsWith("Responses"));
+            
             var connectionString = Configuration.GetConnectionString("NServiceBusTransport");
+
             var transport = new SqlServerTransport(connectionString)
             {
                 DefaultSchema = "dbo",

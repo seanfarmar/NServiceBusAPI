@@ -1,42 +1,41 @@
-using Shared.Requests;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using NServiceBus;
-using NServiceBus.Logging;
-using Shared.Responses;
 using Server.Data;
-using Microsoft.EntityFrameworkCore;
-using Server.DAL;
+using Shared.Requests;
+using Shared.Responses;
+using System.Threading.Tasks;
 
 namespace Server.Requesthandler
 {
-	public class GetCarRequestHandler : IHandleMessages<GetCarRequest>
-	{
-    readonly DbContextOptionsBuilder<CarApiContext> _dbContextOptionsBuilder;
-    readonly CarApiContext _carApiContext;
-    readonly ICarRepository _carRepository;
-
-    public GetCarRequestHandler()
+    public class GetCarRequestHandler : IHandleMessages<GetCarRequest>
     {
-      _dbContextOptionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
-      _carApiContext = new CarApiContext(_dbContextOptionsBuilder.Options);
-      _carRepository = new CarRepository(_carApiContext);
+        readonly ILogger<GetCarRequestHandler> _logger;
+        readonly ICarRepository _carRepository;
+
+        public GetCarRequestHandler(
+            ILogger<GetCarRequestHandler> logger,
+            ICarRepository carRepository)
+        {
+            _logger = logger;
+            _carRepository = carRepository;
+        }
+
+        // TODO: this is not really a good use of messaging, use a call from the API controller to get data from the database
+        public async Task Handle(GetCarRequest message, IMessageHandlerContext context)
+        {
+            _logger.LogInformation("Received GetCarRequest.");
+
+            var car = await _carRepository.GetCarAsync(message.CarId)
+                .ConfigureAwait(false);
+
+            var response = new GetCarResponse()
+            {
+                DataId = message.DataId,
+                Car = car
+            };
+
+            await context.Reply(response)
+                .ConfigureAwait(false);
+        }
     }
-
-    static ILog log = LogManager.GetLogger<GetCarRequestHandler>();
-
-    public async Task Handle(GetCarRequest message, IMessageHandlerContext context)
-    {
-      log.Info("Received GetCarRequest.");
-
-      var car = await _carRepository.GetCarAsync(message.CarId);
-
-      var response = new GetCarResponse()
-      {
-        DataId = message.DataId,
-        Car = car
-      };
-
-      await context.Reply(response);
-    }
-  }
 }

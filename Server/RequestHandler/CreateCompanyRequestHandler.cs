@@ -1,41 +1,40 @@
+using Microsoft.Extensions.Logging;
 using NServiceBus;
-using System.Threading.Tasks;
-using NServiceBus.Logging;
+using Server.Data;
 using Shared.Requests;
 using Shared.Responses;
-using Server.Data;
-using Microsoft.EntityFrameworkCore;
-using Server.DAL;
+using System.Threading.Tasks;
 
 namespace Server.Requesthandler
 {
-	public class CreateCompanyRequestHandler : IHandleMessages<CreateCompanyRequest>
-	{
-    readonly DbContextOptionsBuilder<CarApiContext> _dbContextOptionsBuilder;
-    readonly CarApiContext _carApiContext;
-    readonly ICompanyRepository _companyRepository;
-    public CreateCompanyRequestHandler()
+    public class CreateCompanyRequestHandler : IHandleMessages<CreateCompanyRequest>
     {
-      _dbContextOptionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
-      _carApiContext = new CarApiContext(_dbContextOptionsBuilder.Options);
-      _companyRepository = new CompanyRepository(_carApiContext);
+        readonly ICompanyRepository _companyRepository;
+        readonly ILogger<CreateCompanyRequestHandler> _logger;
+
+        public CreateCompanyRequestHandler(
+            ILogger<CreateCompanyRequestHandler> logger,
+            ICompanyRepository companyRepository)
+        {
+            _logger = logger;
+            _companyRepository = companyRepository;
+        }
+
+        public async Task Handle(CreateCompanyRequest message, IMessageHandlerContext context)
+        {
+            _logger.LogInformation("Received CreateCompanyRequest.");
+
+            await _companyRepository.AddCompanyAsync(message.Company)
+                .ConfigureAwait(false);
+
+            var response = new CreateCompanyResponse()
+            {
+                DataId = message.DataId,
+                Company = message.Company
+            };
+
+            await context.Reply(response)
+                .ConfigureAwait(false);
+        }
     }
-
-    static ILog log = LogManager.GetLogger<CreateCompanyRequest>();
-
-    public async Task Handle(CreateCompanyRequest message, IMessageHandlerContext context)
-    {
-      log.Info("Received CreateCompanyRequest.");
-
-      await _companyRepository.AddCompanyAsync(message.Company);
-
-      var response = new CreateCompanyResponse()
-      {
-        DataId = message.DataId,
-        Company = message.Company
-      };
-
-      await context.Reply(response);
-    }
-  }
 }
