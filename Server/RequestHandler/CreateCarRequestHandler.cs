@@ -6,7 +6,6 @@ using Shared.Responses;
 using Server.Data;
 using Microsoft.EntityFrameworkCore;
 using Server.DAL;
-using static Microsoft.AspNetCore.Hosting.Internal.HostingApplication;
 
 namespace Server.Requesthandler
 {

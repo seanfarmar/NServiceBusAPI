@@ -1,30 +1,34 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using System.Globalization;
-using Microsoft.AspNetCore;
-using System.IO;
-using Microsoft.Extensions.Configuration;
+﻿using System;
+using Microsoft.AspNetCore.Hosting;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using NServiceBus;
 
 namespace Server
 {
 
 	internal class Program
 	{
-		public static void Main(string[] args)
+		public static async Task Main(string[] args)
 		{
-			CultureInfo.CurrentUICulture = new CultureInfo("en-US");
-      var builder = new ConfigurationBuilder()
-        .SetBasePath(Directory.GetCurrentDirectory())
-        .AddJsonFile("appsettings.json");
+            using var host = CreateHostBuilder(args).Build();
+            await host.StartAsync();
 
-      builder.Build();
+            Console.WriteLine("Press any key to shutdown");
+            Console.ReadKey();
+            await host.StopAsync();
+        }
 
-      BuildWebHost(args).Run();
-    }
-
-    static IWebHost BuildWebHost(string[] args) =>
-      WebHost.CreateDefaultBuilder(args)
-        .UseStartup<Startup>()
-        .Build();
+        static IHostBuilder CreateHostBuilder(string[] args) =>
+        Host.CreateDefaultBuilder(args)
+            .UseNServiceBus(c =>
+            {
+                var endpointConfiguration = new EndpointConfiguration("Sample.Core");
+                endpointConfiguration.UseSerialization<SystemJsonSerializer>();
+                endpointConfiguration.UseTransport<LearningTransport>();
+                return endpointConfiguration;
+            }).ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>());
   }
 
 }

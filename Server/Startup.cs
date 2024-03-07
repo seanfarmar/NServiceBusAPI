@@ -9,6 +9,7 @@ using Server.DAL;
 using Server.Data;
 using Server.Requesthandler;
 using Shared;
+using Shared.Requests;
 using System;
 using System.ComponentModel;
 using System.IO;
@@ -77,8 +78,15 @@ namespace Server
       SqlHelper.CreateSchema(connectionString, "server").GetAwaiter().GetResult();
       endpointConfiguration.MakeInstanceUniquelyAddressable("1");
 
-      EndpointInstance = Endpoint.Start(endpointConfiguration).ConfigureAwait(false).GetAwaiter().GetResult();
-      services.AddSingleton(EndpointInstance);
+            EndpointInstance = EndpointWithExternallyManagedContainer.Create(endpointConfiguration, services)
+                .Start(services.BuildServiceProvider())
+                .ConfigureAwait(false)
+                .GetAwaiter()
+                .GetResult();
+
+            services.AddSingleton(EndpointInstance);
+
+            _ = EndpointInstance.SendLocal(new GetCarsRequest { });
     }
 
     public void Configure(IApplicationLifetime appLifetime)

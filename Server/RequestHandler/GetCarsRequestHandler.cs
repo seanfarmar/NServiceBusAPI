@@ -16,11 +16,11 @@ namespace Server.Requesthandler
     readonly CarApiContext _carApiContext;
     readonly ICarRepository _carRepository;
 
-    public GetCarsRequestHandler()
+    public GetCarsRequestHandler(ICarRepository carRepository)
     {
       _dbContextOptionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
       _carApiContext = new CarApiContext(_dbContextOptionsBuilder.Options);
-      _carRepository = new CarRepository(_carApiContext);
+            _carRepository = carRepository;
     }
 
     static ILog log = LogManager.GetLogger<GetCarsRequestHandler>();
