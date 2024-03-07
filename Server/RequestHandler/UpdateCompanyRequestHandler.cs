@@ -7,19 +7,17 @@ using Server.Data;
 using Microsoft.EntityFrameworkCore;
 using Server.DAL;
 
-namespace Server.Requesthandler
+namespace Server.RequestHandlers
 {
 	public class UpdateCompanyRequestHandler : IHandleMessages<UpdateCompanyRequest>
 	{
-    readonly DbContextOptionsBuilder<CarApiContext> _dbContextOptionsBuilder;
-    readonly CarApiContext _carApiContext;
     readonly ICompanyRepository _companyRepository;
-    public UpdateCompanyRequestHandler()
+
+    public UpdateCompanyRequestHandler(ICompanyRepository caompanyRepository)
     {
-      _dbContextOptionsBuilder = new DbContextOptionsBuilder<CarApiContext>();
-      _carApiContext = new CarApiContext(_dbContextOptionsBuilder.Options);
-      _companyRepository = new CompanyRepository(_carApiContext);
+      _companyRepository = caompanyRepository;
     }
+
 
     static ILog log = LogManager.GetLogger<UpdateCompanyRequest>();
 

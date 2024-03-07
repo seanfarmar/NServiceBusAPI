@@ -2,12 +2,12 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using NServiceBus;
 using NServiceBus.Transport.SqlServer;
 using Server.DAL;
 using Server.Data;
-using Server.Requesthandler;
+using Server.RequestHandlers;
+using Server.ResponseHandlers;
 using Shared;
 using Shared.Requests;
 using System;
@@ -47,6 +47,17 @@ namespace Server
       services.AddTransient<GetCompaniesRequestHandler>();
       services.AddTransient<UpdateCarRequestHandler>();
       services.AddTransient<UpdateCompanyRequestHandler>();
+
+      services.AddTransient<CreateCarResponseHandler>();
+      services.AddTransient<CreateCompanyResponseHandler>();
+      services.AddTransient<DeleteCarResponseHandler>();
+      services.AddTransient<DeleteCompanyResponseHandler>();
+      services.AddTransient<GetCarResponseHandler>();
+      services.AddTransient<GetCarsResponseHandler>();
+      services.AddTransient<GetCompanyResponseHandler>();
+      services.AddTransient<GetCompaniesResponseHandler>();
+      services.AddTransient<UpdateCarResponseHandler>();
+      services.AddTransient<UpdateCompanyResponseHandler>();
 
       CarApiExtensions.InitSqLiteDb();
       
