@@ -58,8 +58,8 @@ namespace Server
                })
                .ConfigureServices(services =>
                {
+                   // TODO: this should be in the same database server as the transport if using SQL
                    services.AddDbContext<CarApiContext>(options => options.UseSqlite($"Data Source={dbFilePath}"));
-                   // services.AddTransient<CarApiContext>();
                    services.AddTransient<ICarRepository, CarRepository>();
                    services.AddTransient<ICompanyRepository, CompanyRepository>();
                });
