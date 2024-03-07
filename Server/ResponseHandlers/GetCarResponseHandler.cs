@@ -1,15 +1,12 @@
-using Shared.Responses;
-using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.Logging;
-using Shared.Responses;
 using Server.Data;
-using Microsoft.EntityFrameworkCore;
-using Server.DAL;
+using Shared.Responses;
+using System.Threading.Tasks;
 
 namespace Server.ResponseHandlers
 {
-	public class GetCarResponseHandler : IHandleMessages<GetCarResponse>
+  public class GetCarResponseHandler : IHandleMessages<GetCarResponse>
 	{
     readonly ICarRepository _carRepository;
 
