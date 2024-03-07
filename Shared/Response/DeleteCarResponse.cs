@@ -13,4 +13,3 @@ namespace Shared.Responses
         public Guid DataId { get; set; }
     }
 }
-

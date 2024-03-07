@@ -1,11 +1,10 @@
-using NServiceBus;
 using Shared.Models;
 using System;
 
 namespace Shared.Responses
 {
     [Serializable]
-    public class CreateCompanyResponse : IMessage
+    public class CreateCompanyResponse
     {
         public CreateCompanyResponse()
         {
@@ -16,4 +15,3 @@ namespace Shared.Responses
         public Company Company { get; set; }
     }
 }
-

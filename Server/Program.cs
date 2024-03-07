@@ -15,7 +15,6 @@ using System.Threading.Tasks;
 
 namespace Server
 {
-
     internal class Program
     {
         public static async Task Main(string[] args)
@@ -33,7 +32,6 @@ namespace Server
             }
 
             await app.RunAsync();
-
         }
 
         static IHostBuilder CreateHostBuilder(string[] args)
@@ -47,9 +45,14 @@ namespace Server
                 })
                .UseNServiceBus(ctx =>
                {
-                   var endpointConfiguration = new EndpointConfiguration("NServiceBusCore.Server");
+                   string endpointName = "NServiceBusCore.Server";
 
-                   endpointConfiguration.ApplyEndpointConfiguration(ctx.Configuration.GetConnectionString("NServiceBusTransport"));
+                   var endpointConfiguration = new EndpointConfiguration(endpointName);
+
+                   endpointConfiguration.ApplyEndpointConfiguration(
+                       ctx.Configuration.GetConnectionString("NServiceBusTransport"),
+                       endpointName,
+                       EndpointMappings.MessageEndpointMappings());
 
                    return endpointConfiguration;
                })
@@ -57,8 +60,8 @@ namespace Server
                {
                    services.AddDbContext<CarApiContext>(options => options.UseSqlite($"Data Source={dbFilePath}"));
                    // services.AddTransient<CarApiContext>();
-                   services.AddScoped<ICarRepository, CarRepository>();
-                   services.AddScoped<ICompanyRepository, CompanyRepository>();
+                   services.AddTransient<ICarRepository, CarRepository>();
+                   services.AddTransient<ICompanyRepository, CompanyRepository>();
                });
         }
     }

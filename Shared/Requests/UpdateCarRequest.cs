@@ -1,11 +1,10 @@
-using NServiceBus;
 using Shared.Models;
 using System;
 
 namespace Shared.Requests
 {
     [Serializable]
-    public class UpdateCarRequest : IMessage
+    public class UpdateCarRequest
     {
         public UpdateCarRequest(Car car)
         {

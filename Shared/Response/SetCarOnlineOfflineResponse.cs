@@ -1,11 +1,10 @@
-using NServiceBus;
 using System;
 using Shared.Models;
 
 namespace Shared.Response
 {
 	[Serializable]
-	public class SetCarOnlineOfflineResponse : IMessage
+	public class SetCarOnlineOfflineResponse
 	{
 		public SetCarOnlineOfflineResponse()
 		{
@@ -15,4 +14,3 @@ namespace Shared.Response
 		public Car Car { get; set; }
 	}
 }
-

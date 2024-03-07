@@ -1,5 +1,4 @@
 ﻿using NServiceBus;
-using NServiceBus.Transport.SqlServer;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,30 +7,35 @@ namespace Shared.Particular
 {
     public static class EndpointCommonConfiguration
     {
-        public static void ApplyEndpointConfiguration(this EndpointConfiguration endpointConfiguration, string connectionString)
+        public static void ApplyEndpointConfiguration(
+            this EndpointConfiguration endpointConfiguration,
+            string connectionString,
+            string endpointName,
+            Action<RoutingSettings<SqlServerTransport>>? messageEndpointMappings = null)
         {
             var transport = new SqlServerTransport(connectionString)
             {
-                DefaultSchema = "dbo",
+                //DefaultSchema = "dbo",
                 TransportTransactionMode = TransportTransactionMode.SendsAtomicWithReceive,
-                Subscriptions =
-                {
-                    CacheInvalidationPeriod = TimeSpan.FromMinutes(1),
-                    SubscriptionTableName = new SubscriptionTableName(table: "Subscriptions", schema: "dbo")
-                }
+                //Subscriptions =
+                //{
+                //    CacheInvalidationPeriod = TimeSpan.FromMinutes(1),
+                //    SubscriptionTableName = new SubscriptionTableName(table: "Subscriptions", schema: "dbo")
+                //}
             };
 
-            transport.SchemaAndCatalog.UseSchemaForQueue("error", "dbo");
-            transport.SchemaAndCatalog.UseSchemaForQueue("audit", "dbo");
-            transport.SchemaAndCatalog.UseSchemaForQueue("NServiceBusCore.Client", "client");
+            // transport.SchemaAndCatalog.UseSchemaForQueue("error", "dbo");
+            // transport.SchemaAndCatalog.UseSchemaForQueue("audit", "dbo");
+            // transport.SchemaAndCatalog.UseSchemaForQueue(endpointName, "dbo");
 
             var routing = endpointConfiguration.UseTransport(transport);
 
-            SqlHelper.CreateSchema(connectionString, "server").GetAwaiter().GetResult();
+            // SqlHelper.CreateSchema(connectionString, endpointConfiguration.).GetAwaiter().GetResult();
 
             endpointConfiguration.MakeInstanceUniquelyAddressable("1");
             // Message serialization
             endpointConfiguration.UseSerialization<SystemJsonSerializer>();
+            endpointConfiguration.EnableCallbacks();
 
             // Installers are useful in development. Consider disabling in production.
             // https://docs.particular.net/nservicebus/operations/installers
@@ -44,6 +48,7 @@ namespace Shared.Particular
 
             endpointConfiguration.AuditProcessedMessagesTo("audit");
             endpointConfiguration.SendFailedMessagesTo("error");
+            messageEndpointMappings?.Invoke(routing);
 
             endpointConfiguration.DefineCriticalErrorAction(OnCriticalError);
         }

@@ -92,6 +92,7 @@ namespace CarClient.Controllers
             }
 
             StatusMessage = "Your profile has been updated";
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -112,6 +113,7 @@ namespace CarClient.Controllers
             await _emailSender.SendEmailConfirmationAsync(email, callbackUrl);
 
             StatusMessage = "Verification email sent. Please check your email.";
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -127,6 +129,7 @@ namespace CarClient.Controllers
                 return RedirectToAction(nameof(SetPassword));
 
             var model = new ChangePasswordViewModel { StatusMessage = StatusMessage };
+
             return View(model);
         }
 
@@ -169,6 +172,7 @@ namespace CarClient.Controllers
                 return RedirectToAction(nameof(ChangePassword));
 
             var model = new SetPasswordViewModel { StatusMessage = StatusMessage };
+
             return View(model);
         }
 
@@ -225,6 +229,7 @@ namespace CarClient.Controllers
             var properties =
                 _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl,
                     _userManager.GetUserId(User));
+
             return new ChallengeResult(provider, properties);
         }
 
@@ -249,6 +254,7 @@ namespace CarClient.Controllers
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
             StatusMessage = "The external login was added.";
+
             return RedirectToAction(nameof(ExternalLogins));
         }
 
@@ -267,6 +273,7 @@ namespace CarClient.Controllers
 
             await _signInManager.SignInAsync(user, false);
             StatusMessage = "The external login was removed.";
+
             return RedirectToAction(nameof(ExternalLogins));
         }
 
@@ -313,6 +320,7 @@ namespace CarClient.Controllers
                 throw new ApplicationException($"Unexpected error occured disabling 2FA for user with ID '{user.Id}'.");
 
             _logger.LogInformation("User with ID {UserId} has disabled 2fa.", user.Id);
+
             return RedirectToAction(nameof(TwoFactorAuthentication));
         }
 
@@ -363,7 +371,9 @@ namespace CarClient.Controllers
             }
 
             await _userManager.SetTwoFactorEnabledAsync(user, true);
+
             _logger.LogInformation("User with ID {UserId} has enabled 2FA with an authenticator app.", user.Id);
+
             return RedirectToAction(nameof(GenerateRecoveryCodes));
         }
 
@@ -383,6 +393,7 @@ namespace CarClient.Controllers
 
             await _userManager.SetTwoFactorEnabledAsync(user, false);
             await _userManager.ResetAuthenticatorKeyAsync(user);
+
             _logger.LogInformation("User with id '{UserId}' has reset their authentication app key.", user.Id);
 
             return RedirectToAction(nameof(EnableAuthenticator));

@@ -1,12 +1,10 @@
 using System;
-using NServiceBus;
 using Shared.Models;
 
 namespace Shared.Requests
 {
-
 	[Serializable]
-	public class SetCarOnlineOfflineRequest : IMessage
+	public class SetCarOnlineOfflineRequest
 	{
 		public SetCarOnlineOfflineRequest(Car car)
 		{

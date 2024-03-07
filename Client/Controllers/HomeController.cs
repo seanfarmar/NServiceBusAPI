@@ -13,10 +13,11 @@ namespace Client.Controllers
 {
     public class HomeController : Controller
     {
-        readonly IEndpointInstance _endpointInstance;
-        public HomeController(IEndpointInstance endpointInstance)
+        private readonly IMessageSession _messageSession;
+
+        public HomeController(IMessageSession messageSession)
         {
-            _endpointInstance = endpointInstance;
+            _messageSession = messageSession;
         }
 
         public async Task<IActionResult> Index()
@@ -24,21 +25,23 @@ namespace Client.Controllers
             List<Company> companies;
             try
             {
-                var responseTask = await Utils.Utils.GetCompaniesResponseAsync(_endpointInstance);
+                var responseTask = await Utils.Utils.GetCompaniesResponseAsync(_messageSession);
                 companies = responseTask.Companies;
             }
             catch (Exception e)
             {
                 TempData["CustomError"] = "Ingen kontakt med servern! CarAPI måste startas innan Client kan köras!";
+
                 return View("Index", new HomeViewModel(Guid.NewGuid()) { Companies = new List<Company>() });
             }
 
-            var getCarsResponse = await Utils.Utils.GetCarsResponseAsync(_endpointInstance);
+            var getCarsResponse = await Utils.Utils.GetCarsResponseAsync(_messageSession);
             var allCars = getCarsResponse.Cars.ToList();
+
             foreach (var car in allCars)
             {
                 car.Disabled = false; //Enable updates of Online/Offline
-                var updateCarResponse = Utils.Utils.UpdateCarResponseAsync(car, _endpointInstance);
+                var updateCarResponse = Utils.Utils.UpdateCarResponseAsync(car, _messageSession);
             }
 
             foreach (var company in companies)
@@ -46,7 +49,9 @@ namespace Client.Controllers
                 var companyCars = allCars.Where(o => o.CompanyId == company.Id).ToList();
                 company.Cars = companyCars;
             }
+
             var homeViewModel = new HomeViewModel(Guid.NewGuid()) { Companies = companies };
+
             return View("Index", homeViewModel);
         }
 
