@@ -48,6 +48,7 @@ namespace Client
 
             var dbFilePath = Path.Combine(Path.Combine(AppContext.BaseDirectory, "App_Data"), "AspNet.db");
 
+            // TODO: this should be in the same database server as the transport if using SQL
             builder.Services
                 .AddDbContext<ApplicationDbContext>(options => options.UseSqlite($"Data Source={dbFilePath}"));
 
